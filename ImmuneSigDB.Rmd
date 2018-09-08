@@ -8,15 +8,49 @@ output: html_document
 ## Reproducing a single gene set
 Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set.
 
-```{r}
+```{r global-options, include=FALSE}
+library(knitr)
+opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+```{r libraries}
 library(GEOquery)
+library(oligo)
+library(curl)
+library(urltools)
+library(fs)
+library(lubridate)
 library(tidyverse)
 ```
 
-```{r}
+```{r getgeo-gse2770, cache=TRUE}
 GSE2770 <- getGEO("GSE2770") # There are 3 elements in this list, 1 for each platform
+```
+
+```{r pgse2770, dependson='getgeo-gse2770'}
 pGSE2770 <- GSE2770 %>%
   purrr::map(~ as(pData(.x), "data.frame")) %>%
   bind_rows() %>%
   as.tibble()
+```
+
+```{r pgse2770tidy, dependson='pgse2770'}
+pGSE2770tidy <- pGSE2770 %>%
+  select(platform_id, geo_accession, supplementary_file, title) %>%
+  separate(title, c("cells", "treatment", "time", "replicate", "platform"), sep="[_\\(\\)]") %>%
+  select(-cells) %>%
+  mutate(replicate = map_chr(replicate, ~ str_split(.x, boundary("word"))[[1]][2])) %>%
+  mutate(time = as.duration(time))
+```
+
+```{r get-cel-list, dependson='pgse2770tidy'}
+# get just the U133A cel files
+cels <- pGSE2770tidy %>%
+  filter(time == duration("6h") & (treatment %in% c("antiCD3+antiCD28+IL12+TGFbeta", "antiCD3+antiCD28")) & platform == "U133A") %>%
+  .$supplementary_file
+```
+
+```{r download-cels, dependson='get-cel-list', cache=TRUE}
+cel_files <- path_file(url_parse(cels)$path)
+map2(cels, cel_files, ~ curl_download(.x, .y))
 ```
