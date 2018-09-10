@@ -23,9 +23,13 @@ library(lubridate)
 library(tidyverse)
 ```
 
+First, we download data from [GEO](https://www.ncbi.nlm.nih.gov/geo/).
+
 ```{r getgeo-gse2770, cache=TRUE}
 GSE2770 <- getGEO("GSE2770") # There are 3 elements in this list, 1 for each platform
 ```
+
+Next, we pull out the phenotype data.
 
 ```{r pgse2770, dependson='getgeo-gse2770'}
 pGSE2770 <- GSE2770 %>%
@@ -33,6 +37,8 @@ pGSE2770 <- GSE2770 %>%
   bind_rows() %>%
   as.tibble()
 ```
+
+Then we tidy up the phenotype data.
 
 ```{r pgse2770tidy, dependson='pgse2770'}
 pGSE2770tidy <- pGSE2770 %>%
@@ -43,6 +49,8 @@ pGSE2770tidy <- pGSE2770 %>%
   mutate(time = as.duration(time))
 ```
 
+Here we get the CEL file URLs for the two conditions used to generate this particular gene set.
+
 ```{r get-cel-list, dependson='pgse2770tidy'}
 # get just the U133A cel files
 cel_file_urls <- pGSE2770tidy %>%
@@ -50,14 +58,23 @@ cel_file_urls <- pGSE2770tidy %>%
   .$supplementary_file
 ```
 
+We then download the CEL files.
+
 ```{r download-cels, dependson='get-cel-list', cache=TRUE}
 cel_file_names <- path_file(url_parse(cel_file_urls)$path)
 cel_files_local <- map2(cel_file_urls, cel_file_names, ~ curl_download(.x, .y)) %>% simplify()
 ```
 
+And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database [pd.hg.u133a](https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html) somewhere on disk that the call to `rma()` will pick up.
+
 ```{r read-cels, dependson='download-cels', cache=TRUE}
-# raw_data <- ReadAffy(filenames=cel_files_local, compress=TRUE) # using library(affy)
 raw_data <- read.celfiles(cel_files_local)
 ```
 
+Run RMA on our batch of CEL files to be compared.
+
+```{r rma, dependson='read-cels'}
+processed_data <- rma(raw_data)
+as_tibble(exprs(processed_data), rownames = "probe_set_id")
+```
 
