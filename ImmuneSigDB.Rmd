@@ -45,12 +45,19 @@ pGSE2770tidy <- pGSE2770 %>%
 
 ```{r get-cel-list, dependson='pgse2770tidy'}
 # get just the U133A cel files
-cels <- pGSE2770tidy %>%
+cel_file_urls <- pGSE2770tidy %>%
   filter(time == duration("6h") & (treatment %in% c("antiCD3+antiCD28+IL12+TGFbeta", "antiCD3+antiCD28")) & platform == "U133A") %>%
   .$supplementary_file
 ```
 
 ```{r download-cels, dependson='get-cel-list', cache=TRUE}
-cel_files <- path_file(url_parse(cels)$path)
-map2(cels, cel_files, ~ curl_download(.x, .y))
+cel_file_names <- path_file(url_parse(cel_file_urls)$path)
+cel_files_local <- map2(cel_file_urls, cel_file_names, ~ curl_download(.x, .y)) %>% simplify()
 ```
+
+```{r read-cels, dependson='download-cels', cache=TRUE}
+# raw_data <- ReadAffy(filenames=cel_files_local, compress=TRUE) # using library(affy)
+raw_data <- read.celfiles(cel_files_local)
+```
+
+
