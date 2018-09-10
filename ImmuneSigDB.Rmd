@@ -16,10 +16,12 @@ opts_chunk$set(warning=FALSE, message=FALSE)
 ```{r libraries}
 library(GEOquery)
 library(oligo)
+library(limma)
 library(curl)
 library(urltools)
 library(fs)
 library(lubridate)
+library(janitor)
 library(tidyverse)
 ```
 
@@ -76,5 +78,81 @@ Run RMA on our batch of CEL files to be compared.
 ```{r rma, dependson='read-cels'}
 processed_data <- rma(raw_data)
 as_tibble(exprs(processed_data), rownames = "probe_set_id")
+```
+
+Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we'll use the annotations provided by the Broad that are used in GSEA.
+
+```{r download-chip, cache=TRUE}
+U133A.chip <- read_tsv(curl("ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip"))
+```
+
+We need to clean up the data a bit: the import produced a bogus column (X4), and we only want one gene symbol per probeset ID.
+
+```{r tidy-chip, dependson='download-chip'}
+U133A.chip <- U133A.chip %>% 
+  select(-X4) %>%
+  clean_names() %>%
+  rowwise() %>%
+  mutate(first_gene_symbol = str_trim(str_split(gene_symbol, "///")[[1]][1])) 
+```
+
+Finally we can join with our processed data!
+
+```{r join-chip, dependson=c('rma', 'download-chip')}
+eset_tib <- as_tibble(exprs(processed_data), rownames = "probe_set_id")
+eset_tib_genes <- eset_tib %>% left_join(U133A.chip, by = "probe_set_id")
+```
+
+We now remove probesets that don't map to a gene symbol; note chip files encode this fact with `---`, which we demonstrate first before the filter.
+
+```{r remove-unmapped-probesets, dependson='join-chip'}
+eset_tib_genes %>% filter(is.na(first_gene_symbol)) %>% count() # 0
+eset_tib_genes %>% filter(first_gene_symbol == "---") %>% count() # 1,109
+eset_tib_genes <- eset_tib_genes %>% filter(first_gene_symbol != "---")
+```
+
+Some genes have multiple probesets that map to them. GSEA handles this situation by only keeping the maximum intensity value across all probesets that map to the gene. In GSEA terminology, we are using the max probe algorithm to collapse our pobesets at the gene level.
+
+```{r collapse-probesets, dependson='remove-unmapped-probesets'}
+eset_tib_genes_only <- eset_tib_genes %>%
+  select(-c(probe_set_id, gene_symbol, gene_title)) %>%
+  group_by(first_gene_symbol) %>%
+  summarise_all(max)
+```
+
+Now we'll take our new genes-only expression data and put it into a form expected by `limma`.
+
+```{r make-expressionset, dependson='collapse-probesets'}
+eset_genes <- eset_tib_genes_only %>%
+  as.data.frame() %>%
+  column_to_rownames(var="first_gene_symbol") %>%
+  data.matrix() %>%
+  ExpressionSet()
+```
+
+One last step: we need to make the design matrix for this comparison.
+
+```{r make-design}
+treatments <- factor(c(1,2,2,1), labels=c("untreated", "treated")) # weird ordering of files
+design <- model.matrix(~treatments)
+```
+
+Finally we use `limma` to perform a differential expression analysis!
+
+```{r do-dge, dependson=c('make-expressionset', 'make-design')}
+fit_genes <- lmFit(eset_genes, design)
+fit2_genes <- eBayes(fit_genes)
+results_genes <- topTable(fit2_genes, number=Inf)
+results_genes_tib <- as_tibble(results_genes, rownames = "gene")
+```
+
+Let's look at our results.
+
+```{r dge-results, dependson='do-dge'}
+results_genes_tib %>%
+  arrange(desc(logFC)) %>%
+  head(200) %>%
+  arrange(gene) %>%
+  .$gene
 ```
 
