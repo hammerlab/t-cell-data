@@ -1,9 +1,4 @@
----
-title: "ImmuneSigDB"
-author: "Jeff Hammerbacher"
-date: "September 5, 2018"
-output: html_document
----
+# ImmuneSigDB {#immunesigdb}
 
 ## Reproducing a single gene set
 Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set.
