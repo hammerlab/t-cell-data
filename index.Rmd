@@ -7,11 +7,7 @@ output: bookdown::gitbook
 site: "bookdown::bookdown_site"
 github-repo: hammerlab/t-cell-review
 description: "Tryna make a book."
----insta
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+---
 
 # Quantitative T Cell Subsetology
 
