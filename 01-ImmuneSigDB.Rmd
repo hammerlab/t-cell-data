@@ -1,11 +1,11 @@
 # ImmuneSigDB {#immunesigdb}
 
 ## Reproducing a single gene set
-Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set.
+Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku].
 
 ```{r global-options, include=FALSE}
 library(knitr)
-opts_chunk$set(warning=FALSE, message=FALSE)
+opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```
 
 ```{r libraries}
@@ -20,7 +20,7 @@ library(janitor)
 library(tidyverse)
 ```
 
-First, we download data from [GEO](https://www.ncbi.nlm.nih.gov/geo/).
+First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/).
 
 ```{r getgeo-gse2770, cache=TRUE}
 GSE2770 <- getGEO("GSE2770") # There are 3 elements in this list, 1 for each platform

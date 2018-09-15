@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Learning About T Cells Through Data</title>
+  <meta name="description" content="An examination of T cells using several open data sets.">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Learning About T Cells Through Data" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="An examination of T cells using several open data sets." />
+  <meta name="github-repo" content="hammerlab/learning-about-t-cells-through-data" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Learning About T Cells Through Data" />
+  
+  <meta name="twitter:description" content="An examination of T cells using several open data sets." />
+  
+
+<meta name="author" content="Hammer Lab">
+
+
+<meta name="date" content="2018-09-15">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="index.html">
+<link rel="next" href="references.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Learning About T Cells Through Data</a></li>
+<li class="chapter" data-level="2" data-path="immunesigdb.html"><a href="immunesigdb.html"><i class="fa fa-check"></i><b>2</b> ImmuneSigDB</a><ul>
+<li class="chapter" data-level="2.1" data-path="immunesigdb.html"><a href="immunesigdb.html#reproducing-a-single-gene-set"><i class="fa fa-check"></i><b>2.1</b> Reproducing a single gene set</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Learning About T Cells Through Data</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="immunesigdb" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> ImmuneSigDB</h1>
+<div id="reproducing-a-single-gene-set" class="section level2">
+<h2><span class="header-section-number">2.1</span> Reproducing a single gene set</h2>
+<p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
+<span class="kw">library</span>(oligo)
+<span class="kw">library</span>(limma)
+<span class="kw">library</span>(curl)
+<span class="kw">library</span>(urltools)
+<span class="kw">library</span>(fs)
+<span class="kw">library</span>(lubridate)
+<span class="kw">library</span>(janitor)
+<span class="kw">library</span>(tidyverse)</code></pre></div>
+<p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GSE2770 &lt;-<span class="st"> </span><span class="kw">getGEO</span>(<span class="st">&quot;GSE2770&quot;</span>) <span class="co"># There are 3 elements in this list, 1 for each platform</span></code></pre></div>
+<p>Next, we pull out the phenotype data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pGSE2770 &lt;-<span class="st"> </span>GSE2770 <span class="op">%&gt;%</span>
+<span class="st">  </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">as</span>(<span class="kw">pData</span>(.x), <span class="st">&quot;data.frame&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">bind_rows</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">as.tibble</span>()</code></pre></div>
+<p>Then we tidy up the phenotype data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pGSE2770tidy &lt;-<span class="st"> </span>pGSE2770 <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(platform_id, geo_accession, supplementary_file, title) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">separate</span>(title, <span class="kw">c</span>(<span class="st">&quot;cells&quot;</span>, <span class="st">&quot;treatment&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;replicate&quot;</span>, <span class="st">&quot;platform&quot;</span>), <span class="dt">sep=</span><span class="st">&quot;[_</span><span class="ch">\\</span><span class="st">(</span><span class="ch">\\</span><span class="st">)]&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>cells) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">replicate =</span> <span class="kw">map_chr</span>(replicate, <span class="op">~</span><span class="st"> </span><span class="kw">str_split</span>(.x, <span class="kw">boundary</span>(<span class="st">&quot;word&quot;</span>))[[<span class="dv">1</span>]][<span class="dv">2</span>])) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">time =</span> <span class="kw">as.duration</span>(time))</code></pre></div>
+<p>Here we get the CEL file URLs for the two conditions used to generate this particular gene set.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get just the U133A cel files</span>
+cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="kw">duration</span>(<span class="st">&quot;6h&quot;</span>) <span class="op">&amp;</span><span class="st"> </span>(treatment <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;antiCD3+antiCD28+IL12+TGFbeta&quot;</span>, <span class="st">&quot;antiCD3+antiCD28&quot;</span>)) <span class="op">&amp;</span><span class="st"> </span>platform <span class="op">==</span><span class="st"> &quot;U133A&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span>.<span class="op">$</span>supplementary_file</code></pre></div>
+<p>We then download the CEL files.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cel_file_names &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(cel_file_urls)<span class="op">$</span>path)
+cel_files_local &lt;-<span class="st"> </span><span class="kw">map2</span>(cel_file_urls, cel_file_names, <span class="op">~</span><span class="st"> </span><span class="kw">curl_download</span>(.x, .y)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">simplify</span>()</code></pre></div>
+<p>And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database <a href="https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html">pd.hg.u133a</a> somewhere on disk that the call to <code>rma()</code> will pick up.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">raw_data &lt;-<span class="st"> </span><span class="kw">read.celfiles</span>(cel_files_local)</code></pre></div>
+<p>Run RMA on our batch of CEL files to be compared.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed_data &lt;-<span class="st"> </span><span class="kw">rma</span>(raw_data)
+<span class="kw">as_tibble</span>(<span class="kw">exprs</span>(processed_data), <span class="dt">rownames =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
+<p>Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we’ll use the annotations provided by the Broad that are used in GSEA.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A.chip &lt;-<span class="st"> </span><span class="kw">read_tsv</span>(<span class="kw">curl</span>(<span class="st">&quot;ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip&quot;</span>))</code></pre></div>
+<p>We need to clean up the data a bit: the import produced a bogus column (X4), and we only want one gene symbol per probeset ID.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A.chip &lt;-<span class="st"> </span>U133A.chip <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>X4) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">clean_names</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">rowwise</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">first_gene_symbol =</span> <span class="kw">str_trim</span>(<span class="kw">str_split</span>(gene_symbol, <span class="st">&quot;///&quot;</span>)[[<span class="dv">1</span>]][<span class="dv">1</span>])) </code></pre></div>
+<p>Finally we can join with our processed data!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">exprs</span>(processed_data), <span class="dt">rownames =</span> <span class="st">&quot;probe_set_id&quot;</span>)
+eset_tib_genes &lt;-<span class="st"> </span>eset_tib <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(U133A.chip, <span class="dt">by =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
+<p>We now remove probesets that don’t map to a gene symbol; note chip files encode this fact with <code>---</code>, which we demonstrate first before the filter.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tib_genes <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">is.na</span>(first_gene_symbol)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 0</span>
+eset_tib_genes <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(first_gene_symbol <span class="op">==</span><span class="st"> &quot;---&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 1,109</span>
+eset_tib_genes &lt;-<span class="st"> </span>eset_tib_genes <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(first_gene_symbol <span class="op">!=</span><span class="st"> &quot;---&quot;</span>)</code></pre></div>
+<p>Some genes have multiple probesets that map to them. GSEA handles this situation by only keeping the maximum intensity value across all probesets that map to the gene. In GSEA terminology, we are using the max probe algorithm to collapse our pobesets at the gene level.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tib_genes_only &lt;-<span class="st"> </span>eset_tib_genes <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">c</span>(probe_set_id, gene_symbol, gene_title)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">group_by</span>(first_gene_symbol) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">summarise_all</span>(max)</code></pre></div>
+<p>Now we’ll take our new genes-only expression data and put it into a form expected by <code>limma</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_genes &lt;-<span class="st"> </span>eset_tib_genes_only <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">as.data.frame</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">column_to_rownames</span>(<span class="dt">var=</span><span class="st">&quot;first_gene_symbol&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">data.matrix</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ExpressionSet</span>()</code></pre></div>
+<p>One last step: we need to make the design matrix for this comparison.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">treatments &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;untreated&quot;</span>, <span class="st">&quot;treated&quot;</span>)) <span class="co"># weird ordering of files</span>
+design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(<span class="op">~</span>treatments)</code></pre></div>
+<p>Finally we use <code>limma</code> to perform a differential expression analysis!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit_genes &lt;-<span class="st"> </span><span class="kw">lmFit</span>(eset_genes, design)
+fit2_genes &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit_genes)
+results_genes &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit2_genes, <span class="dt">number=</span><span class="ot">Inf</span>)
+results_genes_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(results_genes, <span class="dt">rownames =</span> <span class="st">&quot;gene&quot;</span>)</code></pre></div>
+<p>Let’s look at our results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_genes_tib <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(logFC)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">head</span>(<span class="dv">200</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">arrange</span>(gene) <span class="op">%&gt;%</span>
+<span class="st">  </span>.<span class="op">$</span>gene</code></pre></div>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Godec2016-ku">
+<p>Godec, Jernej, Yan Tan, Arthur Liberzon, Pablo Tamayo, Sanchita Bhattacharya, Atul J Butte, Jill P Mesirov, and W Nicholas Haining. 2016. “Compendium of Immune Signatures Identifies Conserved and Species-Specific Biology in Response to Inflammation.” <em>Immunity</em> 44 (1): 194–206.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

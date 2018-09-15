@@ -1,14 +1,17 @@
 ---
-title: "Quantitative T Cell Subsetology"
-author: "Jeff Hammerbacher"
-date: "September 10, 2018"
+title: "Learning About T Cells Through Data"
+author: "Hammer Lab"
+date: "`r Sys.Date()`"
 documentclass: book
 output: bookdown::gitbook
+delete_merged_file: true
 site: "bookdown::bookdown_site"
-github-repo: hammerlab/t-cell-review
-description: "Tryna make a book."
+github-repo: hammerlab/learning-about-t-cells-through-data
+description: "An examination of T cells using several open data sets."
+bibliography: "paperpile.bib"
+link-citations: true
 ---
 
-# Quantitative T Cell Subsetology
+# Learning About T Cells Through Data
 
-A book I want to write.
+An examination of T cells using several open data sets.
