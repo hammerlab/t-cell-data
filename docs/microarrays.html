@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="introduction.html">
-<link rel="next" href="references.html">
+<link rel="prev" href="flow.html">
+<link rel="next" href="rnaseq.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -101,10 +101,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>2</b> Microarrays</a><ul>
-<li class="chapter" data-level="2.1" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>2.1</b> Exploring ImmuneSigDB</a></li>
-<li class="chapter" data-level="2.2" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>2.2</b> Reproducing a single gene set from ImmuneSigDB</a></li>
+<li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a></li>
+<li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
+<li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.1</b> Exploring ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>3.2</b> Reproducing a single gene set from ImmuneSigDB</a></li>
 </ul></li>
+<li class="chapter" data-level="4" data-path="rnaseq.html"><a href="rnaseq.html"><i class="fa fa-check"></i><b>4</b> RNA-seq</a></li>
+<li class="chapter" data-level="5" data-path="scrnaseq.html"><a href="scrnaseq.html"><i class="fa fa-check"></i><b>5</b> scRNA-seq</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
 
@@ -124,13 +127,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
             <section class="normal" id="section-">
 <div id="microarrays" class="section level1">
-<h1><span class="header-section-number">Chapter 2</span> Microarrays</h1>
+<h1><span class="header-section-number">Chapter 3</span> Microarrays</h1>
 <div id="exploring-immunesigdb" class="section level2">
-<h2><span class="header-section-number">2.1</span> Exploring ImmuneSigDB</h2>
+<h2><span class="header-section-number">3.1</span> Exploring ImmuneSigDB</h2>
 <p>We need to find T cell data.</p>
 </div>
 <div id="reproducing-a-single-gene-set-from-immunesigdb" class="section level2">
-<h2><span class="header-section-number">2.2</span> Reproducing a single gene set from ImmuneSigDB</h2>
+<h2><span class="header-section-number">3.2</span> Reproducing a single gene set from ImmuneSigDB</h2>
 <p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
 <span class="kw">library</span>(oligo)
@@ -222,8 +225,8 @@ results_genes_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span
           </div>
         </div>
       </div>
-<a href="introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="flow.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="rnaseq.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
