@@ -4,7 +4,6 @@ author: "Hammer Lab"
 date: "`r Sys.Date()`"
 documentclass: book
 output: bookdown::gitbook
-delete_merged_file: true
 site: "bookdown::bookdown_site"
 github-repo: hammerlab/learning-about-t-cells-through-data
 description: "An examination of T cells using several open data sets."
@@ -12,6 +11,6 @@ bibliography: "paperpile.bib"
 link-citations: true
 ---
 
-# Learning About T Cells Through Data
+# Preface {-}
 
 An examination of T cells using several open data sets.
