@@ -1,6 +1,10 @@
-# ImmuneSigDB {#immunesigdb}
+# Microarrays {#microarrays}
 
-## Reproducing a single gene set
+## Exploring ImmuneSigDB
+
+We need to find T cell data.
+
+## Reproducing a single gene set from ImmuneSigDB
 Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku].
 
 ```{r global-options, include=FALSE}

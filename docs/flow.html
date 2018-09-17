@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="microarrays.html">
-
+<link rel="prev" href="introduction.html">
+<link rel="next" href="microarrays.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -49,43 +49,6 @@
 
 
 
-<style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-</style>
 
 </head>
 
@@ -101,9 +64,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>2</b> Microarrays</a><ul>
-<li class="chapter" data-level="2.1" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>2.1</b> Exploring ImmuneSigDB</a></li>
-<li class="chapter" data-level="2.2" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>2.2</b> Reproducing a single gene set from ImmuneSigDB</a></li>
+<li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a></li>
+<li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
+<li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.1</b> Exploring ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>3.2</b> Reproducing a single gene set from ImmuneSigDB</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
@@ -123,25 +87,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="references" class="section level1 unnumbered">
-<h1>References</h1>
+<div id="flow" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Flow</h1>
+<p>The most common way to profile T cells: flow cytometry. It’s actually a single-cell method!</p>
+<p>We’ll examine the OMIP data available from FlowRepository.</p>
 
-<div id="refs" class="references">
-<div>
-<p>Aksoy, Bulent Arman, Pinar Aksoy, Megan Wyatt, Chrystal Paulos, and Jeff Hammerbacher. 2018. “Human Primary T Cells: A Practical Guide.” e26993v1. PeerJ Preprints; PeerJ Inc.</p>
-</div>
-<div>
-<p>Godec, Jernej, Yan Tan, Arthur Liberzon, Pablo Tamayo, Sanchita Bhattacharya, Atul J Butte, Jill P Mesirov, and W Nicholas Haining. 2016. “Compendium of Immune Signatures Identifies Conserved and Species-Specific Biology in Response to Inflammation.” <em>Immunity</em> 44 (1): 194–206.</p>
-</div>
-</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="microarrays.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="microarrays.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

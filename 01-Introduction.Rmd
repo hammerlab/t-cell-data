@@ -1,0 +1,7 @@
+# Introduction {#introduction}
+
+T cells are important.
+
+Here's a picture. TCRs are found in the squiggles. They are x size.
+
+Here's the proportion in circulating blood. Here's how many come from the thymus per day. Here's how long they live.
