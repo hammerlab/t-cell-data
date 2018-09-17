@@ -9,8 +9,13 @@ github-repo: hammerlab/learning-about-t-cells-through-data
 description: "An examination of T cells using several open data sets."
 bibliography: "paperpile.bib"
 link-citations: true
+cover-image: images/cover.png
 ---
 
 # Preface {-}
 
-An examination of T cells using several open data sets.
+```{r fig.align='center', echo=FALSE, include=identical(knitr:::pandoc_to(), 'html')}
+knitr::include_graphics('images/cover.png', dpi = NA)
+```
+
+Why this book was written.
