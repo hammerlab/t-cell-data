@@ -18,4 +18,11 @@ cover-image: images/cover.png
 knitr::include_graphics('images/cover.png', dpi = NA)
 ```
 
-Why this book was written.
+This book explores what open data sets can tell us about T cells. This exploration will highlight a few of the many repositories of data available for analysis, provide code samples for working with this data, and examine the evidence in this data for the various subsets, states, and behaviors of T cells.
+
+There are two specific questions that motivate this exploration:
+
+1. Given a T cell, how can we determine its subset and state
+1. Given a T cell, how can we perturb it to a desired subset and state
+
+Wet lab protocols for working with human primary T cells are found in our lab's [Human Primary T cells: A Practical Guide](https://github.com/hammerlab/t-cell-guide) [@Aksoy2018-iu]. This book is complementary to that guide, with a focus on software and data rather than wet lab protocols.
