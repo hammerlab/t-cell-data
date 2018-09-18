@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-17">
+<meta name="date" content="2018-09-18">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -144,13 +144,22 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(lubridate)
 <span class="kw">library</span>(janitor)
 <span class="kw">library</span>(tidyverse)</code></pre></div>
-<p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GSE2770 &lt;-<span class="st"> </span><span class="kw">getGEO</span>(<span class="st">&quot;GSE2770&quot;</span>) <span class="co"># There are 3 elements in this list, 1 for each platform</span></code></pre></div>
+<p>Let’s put all of our downloaded data into a single directory.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
+<p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>. There are 3 elements in this list, 1 for each platform.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
+<span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
+  <span class="kw">dir_create</span>(download_dir)
+  GSE2770 &lt;-<span class="st"> </span><span class="kw">getGEO</span>(<span class="st">&quot;GSE2770&quot;</span>, <span class="dt">getGPL=</span><span class="ot">FALSE</span>, <span class="dt">destdir=</span>download_dir)
+} <span class="cf">else</span> {
+  GSE2770 &lt;-<span class="st"> </span><span class="kw">dir_ls</span>(download_dir, <span class="dt">glob=</span><span class="st">&quot;*series_matrix*&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">    </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">getGEO</span>(<span class="dt">filename=</span>.x, <span class="dt">getGPL=</span><span class="ot">FALSE</span>))
+}</code></pre></div>
 <p>Next, we pull out the phenotype data.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pGSE2770 &lt;-<span class="st"> </span>GSE2770 <span class="op">%&gt;%</span>
 <span class="st">  </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">as</span>(<span class="kw">pData</span>(.x), <span class="st">&quot;data.frame&quot;</span>)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">bind_rows</span>() <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">as.tibble</span>()</code></pre></div>
+<span class="st">  </span><span class="kw">as_tibble</span>()</code></pre></div>
 <p>Then we tidy up the phenotype data.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pGSE2770tidy &lt;-<span class="st"> </span>pGSE2770 <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">select</span>(platform_id, geo_accession, supplementary_file, title) <span class="op">%&gt;%</span>
@@ -164,24 +173,40 @@ cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%
 <span class="st">  </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="kw">duration</span>(<span class="st">&quot;6h&quot;</span>) <span class="op">&amp;</span><span class="st"> </span>(treatment <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;antiCD3+antiCD28+IL12+TGFbeta&quot;</span>, <span class="st">&quot;antiCD3+antiCD28&quot;</span>)) <span class="op">&amp;</span><span class="st"> </span>platform <span class="op">==</span><span class="st"> &quot;U133A&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span>.<span class="op">$</span>supplementary_file</code></pre></div>
 <p>We then download the CEL files.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cel_file_names &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(cel_file_urls)<span class="op">$</span>path)
-cel_files_local &lt;-<span class="st"> </span><span class="kw">map2</span>(cel_file_urls, cel_file_names, <span class="op">~</span><span class="st"> </span><span class="kw">curl_download</span>(.x, .y)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">simplify</span>()</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;cel_files&quot;</span>)
+<span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
+  <span class="kw">dir_create</span>(download_dir)
+  cel_file_names &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(cel_file_urls)<span class="op">$</span>path)
+  cel_files_local &lt;-<span class="st"> </span><span class="kw">map2</span>(cel_file_urls, <span class="kw">path</span>(download_dir, cel_file_names), <span class="op">~</span><span class="st"> </span><span class="kw">curl_download</span>(.x, .y)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">simplify</span>()
+} <span class="cf">else</span> {
+  cel_files_local &lt;-<span class="st"> </span><span class="kw">dir_ls</span>(download_dir, <span class="dt">glob=</span><span class="st">&quot;*.cel*&quot;</span>, <span class="dt">ignore.case=</span><span class="ot">TRUE</span>)
+}</code></pre></div>
 <p>And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database <a href="https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html">pd.hg.u133a</a> somewhere on disk that the call to <code>rma()</code> will pick up.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">raw_data &lt;-<span class="st"> </span><span class="kw">read.celfiles</span>(cel_files_local)</code></pre></div>
 <p>Run RMA on our batch of CEL files to be compared.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed_data &lt;-<span class="st"> </span><span class="kw">rma</span>(raw_data)
 <span class="kw">as_tibble</span>(<span class="kw">exprs</span>(processed_data), <span class="dt">rownames =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
 <p>Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we’ll use the annotations provided by the Broad that are used in GSEA.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A.chip &lt;-<span class="st"> </span><span class="kw">read_tsv</span>(<span class="kw">curl</span>(<span class="st">&quot;ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip&quot;</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chip_file_url &lt;-<span class="st"> &quot;ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip&quot;</span>
+chip_file_name &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(chip_file_url)<span class="op">$</span>path)
+
+download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;chip_files&quot;</span>)
+<span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
+  <span class="kw">dir_create</span>(download_dir)
+  chip_file &lt;-<span class="st"> </span><span class="kw">curl_download</span>(chip_file_url, <span class="kw">path</span>(download_dir, chip_file_name))
+} <span class="cf">else</span> {
+  chip_file &lt;-<span class="st"> </span><span class="kw">path</span>(download_dir, chip_file_name)
+}</code></pre></div>
 <p>We need to clean up the data a bit: the import produced a bogus column (X4), and we only want one gene symbol per probeset ID.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A.chip &lt;-<span class="st"> </span>U133A.chip <span class="op">%&gt;%</span><span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A_chip_raw &lt;-<span class="st"> </span><span class="kw">read_tsv</span>(chip_file)
+U133A_chip &lt;-<span class="st"> </span>U133A_chip_raw <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>X4) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">clean_names</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">rowwise</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">first_gene_symbol =</span> <span class="kw">str_trim</span>(<span class="kw">str_split</span>(gene_symbol, <span class="st">&quot;///&quot;</span>)[[<span class="dv">1</span>]][<span class="dv">1</span>])) </code></pre></div>
 <p>Finally we can join with our processed data!</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">exprs</span>(processed_data), <span class="dt">rownames =</span> <span class="st">&quot;probe_set_id&quot;</span>)
-eset_tib_genes &lt;-<span class="st"> </span>eset_tib <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(U133A.chip, <span class="dt">by =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
+eset_tib_genes &lt;-<span class="st"> </span>eset_tib <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(U133A_chip, <span class="dt">by =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
 <p>We now remove probesets that don’t map to a gene symbol; note chip files encode this fact with <code>---</code>, which we demonstrate first before the filter.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tib_genes <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">is.na</span>(first_gene_symbol)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 0</span>
 eset_tib_genes <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(first_gene_symbol <span class="op">==</span><span class="st"> &quot;---&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 1,109</span>

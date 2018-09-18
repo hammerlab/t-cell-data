@@ -24,10 +24,23 @@ library(janitor)
 library(tidyverse)
 ```
 
-First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/).
+Let's put all of our downloaded data into a single directory.
 
-```{r getgeo-gse2770, cache=TRUE}
-GSE2770 <- getGEO("GSE2770") # There are 3 elements in this list, 1 for each platform
+```{r create-data-dir}
+data_dir <- dir_create("data")
+```
+
+First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/). There are 3 elements in this list, 1 for each platform.
+
+```{r getgeo-gse2770, dependson='create-data-dir'}
+download_dir <- path(data_dir, "series_matrix_files")
+if (!dir_exists(download_dir)) {
+  dir_create(download_dir)
+  GSE2770 <- getGEO("GSE2770", getGPL=FALSE, destdir=download_dir)
+} else {
+  GSE2770 <- dir_ls(download_dir, glob="*series_matrix*") %>%
+    purrr::map(~ getGEO(filename=.x, getGPL=FALSE))
+}
 ```
 
 Next, we pull out the phenotype data.
@@ -36,7 +49,7 @@ Next, we pull out the phenotype data.
 pGSE2770 <- GSE2770 %>%
   purrr::map(~ as(pData(.x), "data.frame")) %>%
   bind_rows() %>%
-  as.tibble()
+  as_tibble()
 ```
 
 Then we tidy up the phenotype data.
@@ -61,14 +74,20 @@ cel_file_urls <- pGSE2770tidy %>%
 
 We then download the CEL files.
 
-```{r download-cels, dependson='get-cel-list', cache=TRUE}
-cel_file_names <- path_file(url_parse(cel_file_urls)$path)
-cel_files_local <- map2(cel_file_urls, cel_file_names, ~ curl_download(.x, .y)) %>% simplify()
+```{r download-cels, dependson='get-cel-list'}
+download_dir <- path(data_dir, "cel_files")
+if (!dir_exists(download_dir)) {
+  dir_create(download_dir)
+  cel_file_names <- path_file(url_parse(cel_file_urls)$path)
+  cel_files_local <- map2(cel_file_urls, path(download_dir, cel_file_names), ~ curl_download(.x, .y)) %>% simplify()
+} else {
+  cel_files_local <- dir_ls(download_dir, glob="*.cel*", ignore.case=TRUE)
+}
 ```
 
 And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database [pd.hg.u133a](https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html) somewhere on disk that the call to `rma()` will pick up.
 
-```{r read-cels, dependson='download-cels', cache=TRUE}
+```{r read-cels, dependson='download-cels'}
 raw_data <- read.celfiles(cel_files_local)
 ```
 
@@ -81,14 +100,24 @@ as_tibble(exprs(processed_data), rownames = "probe_set_id")
 
 Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we'll use the annotations provided by the Broad that are used in GSEA.
 
-```{r download-chip, cache=TRUE}
-U133A.chip <- read_tsv(curl("ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip"))
+```{r download-chip}
+chip_file_url <- "ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip"
+chip_file_name <- path_file(url_parse(chip_file_url)$path)
+
+download_dir <- path(data_dir, "chip_files")
+if (!dir_exists(download_dir)) {
+  dir_create(download_dir)
+  chip_file <- curl_download(chip_file_url, path(download_dir, chip_file_name))
+} else {
+  chip_file <- path(download_dir, chip_file_name)
+}
 ```
 
 We need to clean up the data a bit: the import produced a bogus column (X4), and we only want one gene symbol per probeset ID.
 
 ```{r tidy-chip, dependson='download-chip'}
-U133A.chip <- U133A.chip %>% 
+U133A_chip_raw <- read_tsv(chip_file)
+U133A_chip <- U133A_chip_raw %>% 
   select(-X4) %>%
   clean_names() %>%
   rowwise() %>%
@@ -99,7 +128,7 @@ Finally we can join with our processed data!
 
 ```{r join-chip, dependson=c('rma', 'download-chip')}
 eset_tib <- as_tibble(exprs(processed_data), rownames = "probe_set_id")
-eset_tib_genes <- eset_tib %>% left_join(U133A.chip, by = "probe_set_id")
+eset_tib_genes <- eset_tib %>% left_join(U133A_chip, by = "probe_set_id")
 ```
 
 We now remove probesets that don't map to a gene symbol; note chip files encode this fact with `---`, which we demonstrate first before the filter.
