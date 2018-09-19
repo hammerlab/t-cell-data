@@ -128,26 +128,43 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="microarrays" class="section level1">
 <h1><span class="header-section-number">Chapter 3</span> Microarrays</h1>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
+<span class="kw">library</span>(oligo)
+<span class="kw">library</span>(limma)
+
+<span class="kw">library</span>(curl)
+<span class="kw">library</span>(fs)
+<span class="kw">library</span>(urltools)
+<span class="kw">library</span>(xml2)
+
+<span class="kw">library</span>(lubridate)
+<span class="kw">library</span>(janitor)
+<span class="kw">library</span>(tidyverse)</code></pre></div>
 <div id="exploring-immunesigdb" class="section level2">
 <h2><span class="header-section-number">3.1</span> Exploring ImmuneSigDB</h2>
-<p>We need to find T cell data.</p>
+<p>What’s in ImmuneSigDB? To find out, head over to the <a href="http://software.broadinstitute.org/gsea/downloads.jsp">GSEA downloads page</a> (you’ll need to register your email address first) and grab the “Current MSigDB xml file”; at the time of this writing, that’s <code>msigdb_v6.2.xml</code>.</p>
+<p>Let’s put all of our downloaded data into a single directory.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
+<p>Here’s some code that I wrote before I knew about <code>purrr</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">read_xml</span>(fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;msigdb_files/msigdb_v6.2.xml&quot;</span>))
+c7 &lt;-<span class="st"> </span><span class="kw">xml_find_all</span>(x, <span class="st">&quot;//GENESET[contains(@CATEGORY_CODE,&#39;C7&#39;)]&quot;</span>)
+<span class="kw">as_tibble</span>(<span class="kw">xml_attr</span>(c7, <span class="st">&quot;ORGANISM&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(value) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(value) <span class="co"># Homo sapiens  1888, Mus musculus  2984</span>
+<span class="kw">as_tibble</span>(<span class="kw">xml_attr</span>(c7, <span class="st">&quot;CONTRIBUTOR&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(value) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>(value) <span class="co"># Jernej Godec  4872</span>
+<span class="kw">as_tibble</span>(<span class="kw">xml_attr</span>(c7, <span class="st">&quot;PMID&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>(value) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 363</span>
+<span class="kw">as_tibble</span>(<span class="kw">xml_attr</span>(c7, <span class="st">&quot;STANDARD_NAME&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(value, <span class="st">&#39;TCELL&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(value, <span class="st">&#39;CD3&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(value, <span class="st">&#39;CD4&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(value, <span class="st">&#39;CD8&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># 1736</span>
+<span class="co"># TRULY HORRIFYING</span>
+c7.tibble &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="kw">lapply</span>(<span class="kw">lapply</span>(<span class="kw">as_list</span>(c7), attributes), as_tibble)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">clean_names</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">unnest</span>(lapply_lapply_as_list_c7_attributes_as_tibble) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">clean_names</span>()
+c7.tibble &lt;-<span class="st"> </span>c7.tibble <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">c</span>(category_code, contributor, contributor_org, external_details_url, founder_names, geneset_listing_url, historical_names, refinement_datasets, sub_category_code, tags, validation_datasets))</code></pre></div>
+<p>Here are a few queries of our cleaned data to find T cell datasets</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c7.tibble <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(standard_name, <span class="st">&#39;TCELL&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD3&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD4&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD8&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(organism) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># Homo sapiens 612, Mus musculus 1124</span>
+<span class="co"># Human T cell publications</span>
+c7.tibble <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(standard_name, <span class="st">&#39;TCELL&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD3&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD4&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD8&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &#39;Homo sapiens&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
 </div>
 <div id="reproducing-a-single-gene-set-from-immunesigdb" class="section level2">
 <h2><span class="header-section-number">3.2</span> Reproducing a single gene set from ImmuneSigDB</h2>
 <p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
-<span class="kw">library</span>(oligo)
-<span class="kw">library</span>(limma)
-<span class="kw">library</span>(curl)
-<span class="kw">library</span>(urltools)
-<span class="kw">library</span>(fs)
-<span class="kw">library</span>(lubridate)
-<span class="kw">library</span>(janitor)
-<span class="kw">library</span>(tidyverse)</code></pre></div>
-<p>Let’s put all of our downloaded data into a single directory.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
 <p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>. There are 3 elements in this list, 1 for each platform.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
 <span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
   <span class="kw">dir_create</span>(download_dir)
   GSE2770 &lt;-<span class="st"> </span><span class="kw">getGEO</span>(<span class="st">&quot;GSE2770&quot;</span>, <span class="dt">getGPL=</span><span class="ot">FALSE</span>, <span class="dt">destdir=</span>download_dir)
@@ -173,11 +190,11 @@ cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%
 <span class="st">  </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="kw">duration</span>(<span class="st">&quot;6h&quot;</span>) <span class="op">&amp;</span><span class="st"> </span>(treatment <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;antiCD3+antiCD28+IL12+TGFbeta&quot;</span>, <span class="st">&quot;antiCD3+antiCD28&quot;</span>)) <span class="op">&amp;</span><span class="st"> </span>platform <span class="op">==</span><span class="st"> &quot;U133A&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span>.<span class="op">$</span>supplementary_file</code></pre></div>
 <p>We then download the CEL files.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;cel_files&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;cel_files&quot;</span>)
 <span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
   <span class="kw">dir_create</span>(download_dir)
   cel_file_names &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(cel_file_urls)<span class="op">$</span>path)
-  cel_files_local &lt;-<span class="st"> </span><span class="kw">map2</span>(cel_file_urls, <span class="kw">path</span>(download_dir, cel_file_names), <span class="op">~</span><span class="st"> </span><span class="kw">curl_download</span>(.x, .y)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">simplify</span>()
+  cel_files_local &lt;-<span class="st"> </span><span class="kw">map2</span>(cel_file_urls, fs<span class="op">::</span><span class="kw">path</span>(download_dir, cel_file_names), <span class="op">~</span><span class="st"> </span><span class="kw">curl_download</span>(.x, .y)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">simplify</span>()
 } <span class="cf">else</span> {
   cel_files_local &lt;-<span class="st"> </span><span class="kw">dir_ls</span>(download_dir, <span class="dt">glob=</span><span class="st">&quot;*.cel*&quot;</span>, <span class="dt">ignore.case=</span><span class="ot">TRUE</span>)
 }</code></pre></div>
@@ -190,12 +207,12 @@ cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chip_file_url &lt;-<span class="st"> &quot;ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip&quot;</span>
 chip_file_name &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(chip_file_url)<span class="op">$</span>path)
 
-download_dir &lt;-<span class="st"> </span><span class="kw">path</span>(data_dir, <span class="st">&quot;chip_files&quot;</span>)
+download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;chip_files&quot;</span>)
 <span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
   <span class="kw">dir_create</span>(download_dir)
-  chip_file &lt;-<span class="st"> </span><span class="kw">curl_download</span>(chip_file_url, <span class="kw">path</span>(download_dir, chip_file_name))
+  chip_file &lt;-<span class="st"> </span><span class="kw">curl_download</span>(chip_file_url, fs<span class="op">::</span><span class="kw">path</span>(download_dir, chip_file_name))
 } <span class="cf">else</span> {
-  chip_file &lt;-<span class="st"> </span><span class="kw">path</span>(download_dir, chip_file_name)
+  chip_file &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(download_dir, chip_file_name)
 }</code></pre></div>
 <p>We need to clean up the data a bit: the import produced a bogus column (X4), and we only want one gene symbol per probeset ID.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">U133A_chip_raw &lt;-<span class="st"> </span><span class="kw">read_tsv</span>(chip_file)

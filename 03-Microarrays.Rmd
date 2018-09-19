@@ -1,12 +1,5 @@
 # Microarrays {#microarrays}
 
-## Exploring ImmuneSigDB
-
-We need to find T cell data.
-
-## Reproducing a single gene set from ImmuneSigDB
-Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku].
-
 ```{r global-options, include=FALSE}
 library(knitr)
 opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
@@ -16,13 +9,20 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 library(GEOquery)
 library(oligo)
 library(limma)
+
 library(curl)
-library(urltools)
 library(fs)
+library(urltools)
+library(xml2)
+
 library(lubridate)
 library(janitor)
 library(tidyverse)
 ```
+
+## Exploring ImmuneSigDB
+
+What's in ImmuneSigDB? To find out, head over to the [GSEA downloads page](http://software.broadinstitute.org/gsea/downloads.jsp) (you'll need to register your email address first) and grab the "Current MSigDB xml file"; at the time of this writing, that's `msigdb_v6.2.xml`.
 
 Let's put all of our downloaded data into a single directory.
 
@@ -30,10 +30,35 @@ Let's put all of our downloaded data into a single directory.
 data_dir <- dir_create("data")
 ```
 
+Here's some code that I wrote before I knew about `purrr`:
+
+```{r munge-msigdb-xml, dependson='create-data-dir'}
+x <- read_xml(fs::path(data_dir, "msigdb_files/msigdb_v6.2.xml"))
+c7 <- xml_find_all(x, "//GENESET[contains(@CATEGORY_CODE,'C7')]")
+as_tibble(xml_attr(c7, "ORGANISM")) %>% group_by(value) %>% count(value) # Homo sapiens  1888, Mus musculus  2984
+as_tibble(xml_attr(c7, "CONTRIBUTOR")) %>% group_by(value) %>% count(value) # Jernej Godec  4872
+as_tibble(xml_attr(c7, "PMID")) %>% distinct(value) %>% count() # 363
+as_tibble(xml_attr(c7, "STANDARD_NAME")) %>% filter(str_detect(value, 'TCELL') | str_detect(value, 'CD3') | str_detect(value, 'CD4') | str_detect(value, 'CD8')) %>% count() # 1736
+# TRULY HORRIFYING
+c7.tibble <- tibble(lapply(lapply(as_list(c7), attributes), as_tibble)) %>% clean_names() %>% unnest(lapply_lapply_as_list_c7_attributes_as_tibble) %>% clean_names()
+c7.tibble <- c7.tibble %>% select(-c(category_code, contributor, contributor_org, external_details_url, founder_names, geneset_listing_url, historical_names, refinement_datasets, sub_category_code, tags, validation_datasets))
+```
+
+Here are a few queries of our cleaned data to find T cell datasets
+
+```{r query-msigdb-xml, dependson='munge-msigdb-xml'}
+c7.tibble %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 1124
+# Human T cell publications
+c7.tibble %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
+```
+
+## Reproducing a single gene set from ImmuneSigDB
+Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku].
+
 First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/). There are 3 elements in this list, 1 for each platform.
 
 ```{r getgeo-gse2770, dependson='create-data-dir'}
-download_dir <- path(data_dir, "series_matrix_files")
+download_dir <- fs::path(data_dir, "series_matrix_files")
 if (!dir_exists(download_dir)) {
   dir_create(download_dir)
   GSE2770 <- getGEO("GSE2770", getGPL=FALSE, destdir=download_dir)
@@ -75,11 +100,11 @@ cel_file_urls <- pGSE2770tidy %>%
 We then download the CEL files.
 
 ```{r download-cels, dependson='get-cel-list'}
-download_dir <- path(data_dir, "cel_files")
+download_dir <- fs::path(data_dir, "cel_files")
 if (!dir_exists(download_dir)) {
   dir_create(download_dir)
   cel_file_names <- path_file(url_parse(cel_file_urls)$path)
-  cel_files_local <- map2(cel_file_urls, path(download_dir, cel_file_names), ~ curl_download(.x, .y)) %>% simplify()
+  cel_files_local <- map2(cel_file_urls, fs::path(download_dir, cel_file_names), ~ curl_download(.x, .y)) %>% simplify()
 } else {
   cel_files_local <- dir_ls(download_dir, glob="*.cel*", ignore.case=TRUE)
 }
@@ -104,12 +129,12 @@ Because we want to do our differential expression analysis at the gene level, no
 chip_file_url <- "ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip"
 chip_file_name <- path_file(url_parse(chip_file_url)$path)
 
-download_dir <- path(data_dir, "chip_files")
+download_dir <- fs::path(data_dir, "chip_files")
 if (!dir_exists(download_dir)) {
   dir_create(download_dir)
-  chip_file <- curl_download(chip_file_url, path(download_dir, chip_file_name))
+  chip_file <- curl_download(chip_file_url, fs::path(download_dir, chip_file_name))
 } else {
-  chip_file <- path(download_dir, chip_file_name)
+  chip_file <- fs::path(download_dir, chip_file_name)
 }
 ```
 
