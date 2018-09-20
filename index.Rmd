@@ -3,7 +3,6 @@ title: "Learning About T Cells Through Data"
 author: "Hammer Lab"
 date: "`r Sys.Date()`"
 documentclass: book
-output: bookdown::gitbook
 site: "bookdown::bookdown_site"
 github-repo: hammerlab/learning-about-t-cells-through-data
 description: "An examination of T cells using several open data sets."
