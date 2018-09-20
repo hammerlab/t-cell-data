@@ -4,3 +4,15 @@ language:
     chapter_name: "Chapter "
 delete_merged_file: true
 output_dir: "docs"
+rmd_files:
+  [
+    "index.Rmd",
+    
+    "Introduction.Rmd",
+    "Flow.Rmd",
+    "Microarrays.Rmd",
+    "RNA-seq.Rmd",
+    "scRNA-seq.Rmd",
+    
+    "References.Rmd"
+  ]
