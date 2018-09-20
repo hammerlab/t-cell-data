@@ -30,26 +30,20 @@ Let's put all of our downloaded data into a single directory.
 data_dir <- dir_create("data")
 ```
 
-Here's some code that I wrote before I knew about `purrr`:
+Put the MSigDB file into this directory at `msigdb_files/msigdb_v6.2.xml`. We are only interested in the C7 gene set, also known as ImmuneSigDB.
 
 ```{r munge-msigdb-xml, dependson='create-data-dir'}
 x <- read_xml(fs::path(data_dir, "msigdb_files/msigdb_v6.2.xml"))
 c7 <- xml_find_all(x, "//GENESET[contains(@CATEGORY_CODE,'C7')]")
-as_tibble(xml_attr(c7, "ORGANISM")) %>% group_by(value) %>% count(value) # Homo sapiens  1888, Mus musculus  2984
-as_tibble(xml_attr(c7, "CONTRIBUTOR")) %>% group_by(value) %>% count(value) # Jernej Godec  4872
-as_tibble(xml_attr(c7, "PMID")) %>% distinct(value) %>% count() # 363
-as_tibble(xml_attr(c7, "STANDARD_NAME")) %>% filter(str_detect(value, 'TCELL') | str_detect(value, 'CD3') | str_detect(value, 'CD4') | str_detect(value, 'CD8')) %>% count() # 1736
-# TRULY HORRIFYING
-c7.tibble <- tibble(lapply(lapply(as_list(c7), attributes), as_tibble)) %>% clean_names() %>% unnest(lapply_lapply_as_list_c7_attributes_as_tibble) %>% clean_names()
-c7.tibble <- c7.tibble %>% select(-c(category_code, contributor, contributor_org, external_details_url, founder_names, geneset_listing_url, historical_names, refinement_datasets, sub_category_code, tags, validation_datasets))
+c7_tib <- c7 %>% as_list %>% purrr::map(~ as_tibble(attributes(.x))) %>% bind_rows %>% clean_names
 ```
 
-Here are a few queries of our cleaned data to find T cell datasets
+Here are a few queries of our cleaned data to find T cell datasets.
 
 ```{r query-msigdb-xml, dependson='munge-msigdb-xml'}
-c7.tibble %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 1124
+c7_tib %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 1124
 # Human T cell publications
-c7.tibble %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
+c7_tib %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
 ```
 
 ## Reproducing a single gene set from ImmuneSigDB
