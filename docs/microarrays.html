@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-20">
+<meta name="date" content="2018-09-21">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -131,6 +131,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
 <span class="kw">library</span>(oligo)
 <span class="kw">library</span>(limma)
+<span class="kw">library</span>(biobroom)
 
 <span class="kw">library</span>(curl)
 <span class="kw">library</span>(fs)
@@ -242,11 +243,12 @@ fit2_genes &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit_gene
 results_genes &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit2_genes, <span class="dt">number=</span><span class="ot">Inf</span>)
 results_genes_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(results_genes, <span class="dt">rownames =</span> <span class="st">&quot;gene&quot;</span>)</code></pre></div>
 <p>Let’s look at our results.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results_genes_tib <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(logFC)) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">head</span>(<span class="dv">200</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">arrange</span>(gene) <span class="op">%&gt;%</span>
-<span class="st">  </span>.<span class="op">$</span>gene</code></pre></div>
+<div class="figure"><span id="fig:volcano"></span>
+<img src="learning-about-t-cells-through-data_files/figure-html/volcano-1.png" alt="Volcano plot made with biobroom" width="672" />
+<p class="caption">
+Figure 3.1: Volcano plot made with biobroom
+</p>
+</div>
 
 </div>
 </div>

@@ -9,6 +9,7 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 library(GEOquery)
 library(oligo)
 library(limma)
+library(biobroom)
 
 library(curl)
 library(fs)
@@ -195,11 +196,9 @@ results_genes_tib <- as_tibble(results_genes, rownames = "gene")
 
 Let's look at our results.
 
-```{r dge-results, dependson='do-dge'}
-results_genes_tib %>%
-  arrange(desc(logFC)) %>%
-  head(200) %>%
-  arrange(gene) %>%
-  .$gene
+```{r volcano, dependson='do-dge', fig.cap = "Volcano plot made with biobroom", echo = FALSE}
+ggplot(tidy(fit2_genes), aes(x=estimate, y=log(p.value), color=statistic)) + 
+  geom_point() +
+  theme_bw()
 ```
 
