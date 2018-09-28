@@ -21,6 +21,22 @@ library(janitor)
 library(tidyverse)
 ```
 
+## Overview
+
+We'll make 3 interesting tibbles:
+
+1. `c7_tcells`: T cell subset of ImmuneSigDB. Each row is a gene set.
+
+1. `pGSE2770tidy`: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.
+
+1. `eset_tib_genes`: preprocessed expression data for the samples we're analyzing. Each row is a gene.
+
+1. `results_genes_tib`: results of the limma differential expression analysis. Each row is a gene.
+
+## Expression profiling with microarrays
+
+Blah blah blah how microarrays work. Probably reference opening of RMA paper.
+
 ## Exploring ImmuneSigDB
 
 What's in ImmuneSigDB? To find out, head over to the [GSEA downloads page](http://software.broadinstitute.org/gsea/downloads.jsp) (you'll need to register your email address first) and grab the "Current MSigDB xml file"; at the time of this writing, that's `msigdb_v6.2.xml`.
@@ -31,7 +47,7 @@ Let's put all of our downloaded data into a single directory.
 data_dir <- dir_create("data")
 ```
 
-Put the MSigDB file into this directory at `msigdb_files/msigdb_v6.2.xml`. We are only interested in the C7 gene set, also known as ImmuneSigDB.
+Put the MSigDB file into this directory at `msigdb_files/msigdb_v6.2.xml`. We are only interested in the C7 gene set, also known as ImmuneSigDB. For now we are using XPath to extract the relevant data; perhaps we should show how to explore the XML file and construct this query.
 
 ```{r munge-msigdb-xml, dependson='create-data-dir'}
 x <- read_xml(fs::path(data_dir, "msigdb_files/msigdb_v6.2.xml"))
@@ -39,12 +55,14 @@ c7 <- xml_find_all(x, "//GENESET[contains(@CATEGORY_CODE,'C7')]")
 c7_tib <- c7 %>% as_list %>% purrr::map(~ as_tibble(attributes(.x))) %>% bind_rows %>% clean_names
 ```
 
-Here are a few queries of our cleaned data to find T cell datasets.
+Each row in `c7_tib` represents a gene set from ImmuneSigDB. We filter down to those we suspect relate to T cells, and compute some descriptive statistics about them.
 
 ```{r query-msigdb-xml, dependson='munge-msigdb-xml'}
-c7_tib %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 1124
+tcell_terms <- c("TCELL", "CD3", "CD4", "CD8")
+c7_tcells <- c7_tib %>% rowwise %>% filter(any(str_detect(standard_name, tcell_terms))) %>% ungroup
+c7_tcells %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 1124
 # Human T cell publications
-c7_tib %>% filter(str_detect(standard_name, 'TCELL') | str_detect(standard_name, 'CD3') | str_detect(standard_name, 'CD4') | str_detect(standard_name, 'CD8')) %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
+c7_tcells %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
 ```
 
 ## Reproducing a single gene set from ImmuneSigDB
@@ -201,4 +219,3 @@ ggplot(tidy(fit2_genes), aes(x=estimate, y=log(p.value), color=statistic)) +
   geom_point() +
   theme_bw()
 ```
-

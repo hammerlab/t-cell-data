@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-22">
+<meta name="date" content="2018-09-28">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -103,8 +103,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
 <li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a></li>
 <li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
-<li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.1</b> Exploring ImmuneSigDB</a></li>
-<li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>3.2</b> Reproducing a single gene set from ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
+<li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#expression-profiling-with-microarrays"><i class="fa fa-check"></i><b>3.2</b> Expression profiling with microarrays</a></li>
+<li class="chapter" data-level="3.3" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.3</b> Exploring ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.4" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>3.4</b> Reproducing a single gene set from ImmuneSigDB</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="rnaseq.html"><a href="rnaseq.html"><i class="fa fa-check"></i><b>4</b> RNA-seq</a></li>
 <li class="chapter" data-level="5" data-path="scrnaseq.html"><a href="scrnaseq.html"><i class="fa fa-check"></i><b>5</b> scRNA-seq</a></li>
@@ -141,22 +143,38 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(lubridate)
 <span class="kw">library</span>(janitor)
 <span class="kw">library</span>(tidyverse)</code></pre></div>
+<div id="overview" class="section level2">
+<h2><span class="header-section-number">3.1</span> Overview</h2>
+<p>We’ll make 3 interesting tibbles:</p>
+<ol style="list-style-type: decimal">
+<li><p><code>c7_tcells</code>: T cell subset of ImmuneSigDB. Each row is a gene set.</p></li>
+<li><p><code>pGSE2770tidy</code>: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.</p></li>
+<li><p><code>eset_tib_genes</code>: preprocessed expression data for the samples we’re analyzing. Each row is a gene.</p></li>
+<li><p><code>results_genes_tib</code>: results of the limma differential expression analysis. Each row is a gene.</p></li>
+</ol>
+</div>
+<div id="expression-profiling-with-microarrays" class="section level2">
+<h2><span class="header-section-number">3.2</span> Expression profiling with microarrays</h2>
+<p>Blah blah blah how microarrays work. Probably reference opening of RMA paper.</p>
+</div>
 <div id="exploring-immunesigdb" class="section level2">
-<h2><span class="header-section-number">3.1</span> Exploring ImmuneSigDB</h2>
+<h2><span class="header-section-number">3.3</span> Exploring ImmuneSigDB</h2>
 <p>What’s in ImmuneSigDB? To find out, head over to the <a href="http://software.broadinstitute.org/gsea/downloads.jsp">GSEA downloads page</a> (you’ll need to register your email address first) and grab the “Current MSigDB xml file”; at the time of this writing, that’s <code>msigdb_v6.2.xml</code>.</p>
 <p>Let’s put all of our downloaded data into a single directory.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
-<p>Put the MSigDB file into this directory at <code>msigdb_files/msigdb_v6.2.xml</code>. We are only interested in the C7 gene set, also known as ImmuneSigDB.</p>
+<p>Put the MSigDB file into this directory at <code>msigdb_files/msigdb_v6.2.xml</code>. We are only interested in the C7 gene set, also known as ImmuneSigDB. For now we are using XPath to extract the relevant data; perhaps we should show how to explore the XML file and construct this query.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">read_xml</span>(fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;msigdb_files/msigdb_v6.2.xml&quot;</span>))
 c7 &lt;-<span class="st"> </span><span class="kw">xml_find_all</span>(x, <span class="st">&quot;//GENESET[contains(@CATEGORY_CODE,&#39;C7&#39;)]&quot;</span>)
 c7_tib &lt;-<span class="st"> </span>c7 <span class="op">%&gt;%</span><span class="st"> </span>as_list <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">attributes</span>(.x))) <span class="op">%&gt;%</span><span class="st"> </span>bind_rows <span class="op">%&gt;%</span><span class="st"> </span>clean_names</code></pre></div>
-<p>Here are a few queries of our cleaned data to find T cell datasets.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c7_tib <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(standard_name, <span class="st">&#39;TCELL&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD3&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD4&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD8&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(organism) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># Homo sapiens 612, Mus musculus 1124</span>
+<p>Each row in <code>c7_tib</code> represents a gene set from ImmuneSigDB. We filter down to those we suspect relate to T cells, and compute some descriptive statistics about them.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcell_terms &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;TCELL&quot;</span>, <span class="st">&quot;CD3&quot;</span>, <span class="st">&quot;CD4&quot;</span>, <span class="st">&quot;CD8&quot;</span>)
+c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><span class="st"> </span>rowwise <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">any</span>(<span class="kw">str_detect</span>(standard_name, tcell_terms))) <span class="op">%&gt;%</span><span class="st"> </span>ungroup
+c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(organism) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># Homo sapiens 612, Mus musculus 1124</span>
 <span class="co"># Human T cell publications</span>
-c7_tib <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">str_detect</span>(standard_name, <span class="st">&#39;TCELL&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD3&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD4&#39;</span>) <span class="op">|</span><span class="st"> </span><span class="kw">str_detect</span>(standard_name, <span class="st">&#39;CD8&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &#39;Homo sapiens&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
+c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &#39;Homo sapiens&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
 </div>
 <div id="reproducing-a-single-gene-set-from-immunesigdb" class="section level2">
-<h2><span class="header-section-number">3.2</span> Reproducing a single gene set from ImmuneSigDB</h2>
+<h2><span class="header-section-number">3.4</span> Reproducing a single gene set from ImmuneSigDB</h2>
 <p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>.</p>
 <p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>. There are 3 elements in this list, 1 for each platform.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
