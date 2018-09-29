@@ -23,19 +23,27 @@ library(tidyverse)
 
 ## Overview
 
-We'll make 3 interesting tibbles:
+We want to find data about gene expression in T cells. Through analysis of this data, we hope to be able to distinguish T cells from other cells, as well as T cell subsets from one another.
+
+A tibble-centric view of this chapter:
 
 1. `c7_tcells`: T cell subset of ImmuneSigDB. Each row is a gene set.
 
 1. `pGSE2770tidy`: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.
 
-1. `eset_tib_genes`: preprocessed expression data for the samples we're analyzing. Each row is a gene.
+1. `eset_tib_genes`: preprocessed expression data for the samples we're analyzing. "Wide" version of table with one column per sample. Primary key is gene.
+
+1. `eset_tidy_p`: preprocessed expression data joined to phenotype data about the sample. "Tall" version of table. Primary key is (gene, sample).
 
 1. `results_genes_tib`: results of the limma differential expression analysis. Each row is a gene.
 
 ## Expression profiling with microarrays
 
-Blah blah blah how microarrays work. Probably reference opening of RMA paper.
+Explain how microarrays work. Probably reference opening of RMA paper.
+
+## T cell expression profiles
+
+My first thought on where to look for expression data on T cells: ImmuneSigDB.
 
 ## Exploring ImmuneSigDB
 
@@ -65,9 +73,7 @@ c7_tcells %>% group_by(organism) %>% count() # Homo sapiens 612, Mus musculus 11
 c7_tcells %>% filter(organism == 'Homo sapiens') %>% group_by(pmid) %>% count() %>% arrange(desc(n))
 ```
 
-## Reproducing a single gene set from ImmuneSigDB
-Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku].
-
+## Data from one paper
 First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/). There are 3 elements in this list, 1 for each platform.
 
 ```{r getgeo-gse2770, dependson='create-data-dir'}
@@ -101,7 +107,9 @@ pGSE2770tidy <- pGSE2770 %>%
   mutate(time = as.duration(time))
 ```
 
-Here we get the CEL file URLs for the two conditions used to generate this particular gene set.
+## Data from one gene set
+
+Let's just get the CEL files used to generate the [GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN](http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN) gene set from ImmuneSigDB [@Godec2016-ku]. There are only two treatments to compare, at a single time point. Each treatment is replicated twice.
 
 ```{r get-cel-list, dependson='pgse2770tidy'}
 # get just the U133A cel files
@@ -123,11 +131,15 @@ if (!dir_exists(download_dir)) {
 }
 ```
 
+## Load expression data
+
 And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database [pd.hg.u133a](https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html) somewhere on disk that the call to `rma()` will pick up.
 
 ```{r read-cels, dependson='download-cels'}
 raw_data <- read.celfiles(cel_files_local)
 ```
+
+## Preprocess expression data
 
 Run RMA on our batch of CEL files to be compared.
 
@@ -135,6 +147,8 @@ Run RMA on our batch of CEL files to be compared.
 processed_data <- rma(raw_data)
 as_tibble(exprs(processed_data), rownames = "probe_set_id")
 ```
+
+## Map probesets to genes
 
 Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we'll use the annotations provided by the Broad that are used in GSEA.
 
@@ -185,6 +199,30 @@ eset_tib_genes_only <- eset_tib_genes %>%
   group_by(first_gene_symbol) %>%
   summarise_all(max)
 ```
+
+## Exploring preprocessed expression data
+
+We join our expression data with our phenotype data so that we know which treatment was used for each sample.
+
+```{r explore-eset, dependson='collapse-probesets'}
+eset_tidy <- eset_tib_genes_only %>%
+  gather(key = "geo_accession", value = "expression", starts_with("GSM")) %>%
+  mutate(geo_accession = str_extract(geo_accession, "^([^.]+)"))
+eset_tidy_p <- eset_tidy %>%
+  left_join(pGSE2770tidy, by = "geo_accession")
+```
+
+```{r graph-genes, dependson='explore-eset', fig.cap = "Expression level vs. treatment"}
+genes <- c("IFNG", "TBX21", "IL4", "GATA3")
+ggplot(eset_tidy_p %>% filter(first_gene_symbol %in% genes),
+       aes(x=treatment, y=expression, color=replicate)) +
+  geom_point() +
+  facet_wrap(~first_gene_symbol, ncol=1, scales="free") +
+  theme_bw()
+```
+
+
+## Differential expression analysis
 
 Now we'll take our new genes-only expression data and put it into a form expected by `limma`.
 

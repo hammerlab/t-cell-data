@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-28">
+<meta name="date" content="2018-09-29">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -105,8 +105,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
 <li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
 <li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#expression-profiling-with-microarrays"><i class="fa fa-check"></i><b>3.2</b> Expression profiling with microarrays</a></li>
-<li class="chapter" data-level="3.3" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.3</b> Exploring ImmuneSigDB</a></li>
-<li class="chapter" data-level="3.4" data-path="microarrays.html"><a href="microarrays.html#reproducing-a-single-gene-set-from-immunesigdb"><i class="fa fa-check"></i><b>3.4</b> Reproducing a single gene set from ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.3" data-path="microarrays.html"><a href="microarrays.html#t-cell-expression-profiles"><i class="fa fa-check"></i><b>3.3</b> T cell expression profiles</a></li>
+<li class="chapter" data-level="3.4" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.4</b> Exploring ImmuneSigDB</a></li>
+<li class="chapter" data-level="3.5" data-path="microarrays.html"><a href="microarrays.html#data-from-one-paper"><i class="fa fa-check"></i><b>3.5</b> Data from one paper</a></li>
+<li class="chapter" data-level="3.6" data-path="microarrays.html"><a href="microarrays.html#data-from-one-gene-set"><i class="fa fa-check"></i><b>3.6</b> Data from one gene set</a></li>
+<li class="chapter" data-level="3.7" data-path="microarrays.html"><a href="microarrays.html#load-expression-data"><i class="fa fa-check"></i><b>3.7</b> Load expression data</a></li>
+<li class="chapter" data-level="3.8" data-path="microarrays.html"><a href="microarrays.html#preprocess-expression-data"><i class="fa fa-check"></i><b>3.8</b> Preprocess expression data</a></li>
+<li class="chapter" data-level="3.9" data-path="microarrays.html"><a href="microarrays.html#map-probesets-to-genes"><i class="fa fa-check"></i><b>3.9</b> Map probesets to genes</a></li>
+<li class="chapter" data-level="3.10" data-path="microarrays.html"><a href="microarrays.html#exploring-preprocessed-expression-data"><i class="fa fa-check"></i><b>3.10</b> Exploring preprocessed expression data</a></li>
+<li class="chapter" data-level="3.11" data-path="microarrays.html"><a href="microarrays.html#differential-expression-analysis"><i class="fa fa-check"></i><b>3.11</b> Differential expression analysis</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="rnaseq.html"><a href="rnaseq.html"><i class="fa fa-check"></i><b>4</b> RNA-seq</a></li>
 <li class="chapter" data-level="5" data-path="scrnaseq.html"><a href="scrnaseq.html"><i class="fa fa-check"></i><b>5</b> scRNA-seq</a></li>
@@ -145,20 +152,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(tidyverse)</code></pre></div>
 <div id="overview" class="section level2">
 <h2><span class="header-section-number">3.1</span> Overview</h2>
-<p>We’ll make 3 interesting tibbles:</p>
+<p>We want to find data about gene expression in T cells. Through analysis of this data, we hope to be able to distinguish T cells from other cells, as well as T cell subsets from one another.</p>
+<p>A tibble-centric view of this chapter:</p>
 <ol style="list-style-type: decimal">
 <li><p><code>c7_tcells</code>: T cell subset of ImmuneSigDB. Each row is a gene set.</p></li>
 <li><p><code>pGSE2770tidy</code>: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.</p></li>
-<li><p><code>eset_tib_genes</code>: preprocessed expression data for the samples we’re analyzing. Each row is a gene.</p></li>
+<li><p><code>eset_tib_genes</code>: preprocessed expression data for the samples we’re analyzing. “Wide” version of table with one column per sample. Primary key is gene.</p></li>
+<li><p><code>eset_tidy_p</code>: preprocessed expression data joined to phenotype data about the sample. “Tall” version of table. Primary key is (gene, sample).</p></li>
 <li><p><code>results_genes_tib</code>: results of the limma differential expression analysis. Each row is a gene.</p></li>
 </ol>
 </div>
 <div id="expression-profiling-with-microarrays" class="section level2">
 <h2><span class="header-section-number">3.2</span> Expression profiling with microarrays</h2>
-<p>Blah blah blah how microarrays work. Probably reference opening of RMA paper.</p>
+<p>Explain how microarrays work. Probably reference opening of RMA paper.</p>
+</div>
+<div id="t-cell-expression-profiles" class="section level2">
+<h2><span class="header-section-number">3.3</span> T cell expression profiles</h2>
+<p>My first thought on where to look for expression data on T cells: ImmuneSigDB.</p>
 </div>
 <div id="exploring-immunesigdb" class="section level2">
-<h2><span class="header-section-number">3.3</span> Exploring ImmuneSigDB</h2>
+<h2><span class="header-section-number">3.4</span> Exploring ImmuneSigDB</h2>
 <p>What’s in ImmuneSigDB? To find out, head over to the <a href="http://software.broadinstitute.org/gsea/downloads.jsp">GSEA downloads page</a> (you’ll need to register your email address first) and grab the “Current MSigDB xml file”; at the time of this writing, that’s <code>msigdb_v6.2.xml</code>.</p>
 <p>Let’s put all of our downloaded data into a single directory.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
@@ -173,9 +186,8 @@ c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw
 <span class="co"># Human T cell publications</span>
 c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &#39;Homo sapiens&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
 </div>
-<div id="reproducing-a-single-gene-set-from-immunesigdb" class="section level2">
-<h2><span class="header-section-number">3.4</span> Reproducing a single gene set from ImmuneSigDB</h2>
-<p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>.</p>
+<div id="data-from-one-paper" class="section level2">
+<h2><span class="header-section-number">3.5</span> Data from one paper</h2>
 <p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>. There are 3 elements in this list, 1 for each platform.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
 <span class="cf">if</span> (<span class="op">!</span><span class="kw">dir_exists</span>(download_dir)) {
@@ -197,7 +209,10 @@ c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw
 <span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>cells) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">replicate =</span> <span class="kw">map_chr</span>(replicate, <span class="op">~</span><span class="st"> </span><span class="kw">str_split</span>(.x, <span class="kw">boundary</span>(<span class="st">&quot;word&quot;</span>))[[<span class="dv">1</span>]][<span class="dv">2</span>])) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">time =</span> <span class="kw">as.duration</span>(time))</code></pre></div>
-<p>Here we get the CEL file URLs for the two conditions used to generate this particular gene set.</p>
+</div>
+<div id="data-from-one-gene-set" class="section level2">
+<h2><span class="header-section-number">3.6</span> Data from one gene set</h2>
+<p>Let’s just get the CEL files used to generate the <a href="http://software.broadinstitute.org/gsea/msigdb/geneset_page.jsp?geneSetName=GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN">GSE2770_IL12_AND_TGFB_ACT_VS_ACT_CD4_TCELL_6H_DN</a> gene set from ImmuneSigDB <span class="citation">(Godec et al. <a href="#ref-Godec2016-ku">2016</a>)</span>. There are only two treatments to compare, at a single time point. Each treatment is replicated twice.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get just the U133A cel files</span>
 cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(time <span class="op">==</span><span class="st"> </span><span class="kw">duration</span>(<span class="st">&quot;6h&quot;</span>) <span class="op">&amp;</span><span class="st"> </span>(treatment <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;antiCD3+antiCD28+IL12+TGFbeta&quot;</span>, <span class="st">&quot;antiCD3+antiCD28&quot;</span>)) <span class="op">&amp;</span><span class="st"> </span>platform <span class="op">==</span><span class="st"> &quot;U133A&quot;</span>) <span class="op">%&gt;%</span>
@@ -211,11 +226,20 @@ cel_file_urls &lt;-<span class="st"> </span>pGSE2770tidy <span class="op">%&gt;%
 } <span class="cf">else</span> {
   cel_files_local &lt;-<span class="st"> </span><span class="kw">dir_ls</span>(download_dir, <span class="dt">glob=</span><span class="st">&quot;*.cel*&quot;</span>, <span class="dt">ignore.case=</span><span class="ot">TRUE</span>)
 }</code></pre></div>
+</div>
+<div id="load-expression-data" class="section level2">
+<h2><span class="header-section-number">3.7</span> Load expression data</h2>
 <p>And read them into an oligo ExpressionFeatureSet object. Note the feature data (i.e. the probeset IDs) are not stored in the feature data of the ExpressionSet object, but rather in a SQLlite database <a href="https://bioconductor.org/packages/release/data/annotation/html/pd.hg.u133a.html">pd.hg.u133a</a> somewhere on disk that the call to <code>rma()</code> will pick up.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">raw_data &lt;-<span class="st"> </span><span class="kw">read.celfiles</span>(cel_files_local)</code></pre></div>
+</div>
+<div id="preprocess-expression-data" class="section level2">
+<h2><span class="header-section-number">3.8</span> Preprocess expression data</h2>
 <p>Run RMA on our batch of CEL files to be compared.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">processed_data &lt;-<span class="st"> </span><span class="kw">rma</span>(raw_data)
 <span class="kw">as_tibble</span>(<span class="kw">exprs</span>(processed_data), <span class="dt">rownames =</span> <span class="st">&quot;probe_set_id&quot;</span>)</code></pre></div>
+</div>
+<div id="map-probesets-to-genes" class="section level2">
+<h2><span class="header-section-number">3.9</span> Map probesets to genes</h2>
 <p>Because we want to do our differential expression analysis at the gene level, not the probeset level, we need to map probeset IDs to gene symbols. To ensure comparability with the GSEA gene sets, we’ll use the annotations provided by the Broad that are used in GSEA.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chip_file_url &lt;-<span class="st"> &quot;ftp://ftp.broadinstitute.org/pub/gsea/annotations/HG_U133A.chip&quot;</span>
 chip_file_name &lt;-<span class="st"> </span><span class="kw">path_file</span>(<span class="kw">url_parse</span>(chip_file_url)<span class="op">$</span>path)
@@ -246,6 +270,30 @@ eset_tib_genes &lt;-<span class="st"> </span>eset_tib_genes <span class="op">%&g
 <span class="st">  </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">c</span>(probe_set_id, gene_symbol, gene_title)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(first_gene_symbol) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">summarise_all</span>(max)</code></pre></div>
+</div>
+<div id="exploring-preprocessed-expression-data" class="section level2">
+<h2><span class="header-section-number">3.10</span> Exploring preprocessed expression data</h2>
+<p>We join our expression data with our phenotype data so that we know which treatment was used for each sample.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_tidy &lt;-<span class="st"> </span>eset_tib_genes_only <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;geo_accession&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;expression&quot;</span>, <span class="kw">starts_with</span>(<span class="st">&quot;GSM&quot;</span>)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">geo_accession =</span> <span class="kw">str_extract</span>(geo_accession, <span class="st">&quot;^([^.]+)&quot;</span>))
+eset_tidy_p &lt;-<span class="st"> </span>eset_tidy <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">left_join</span>(pGSE2770tidy, <span class="dt">by =</span> <span class="st">&quot;geo_accession&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">genes &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;IFNG&quot;</span>, <span class="st">&quot;TBX21&quot;</span>, <span class="st">&quot;IL4&quot;</span>, <span class="st">&quot;GATA3&quot;</span>)
+<span class="kw">ggplot</span>(eset_tidy_p <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(first_gene_symbol <span class="op">%in%</span><span class="st"> </span>genes),
+       <span class="kw">aes</span>(<span class="dt">x=</span>treatment, <span class="dt">y=</span>expression, <span class="dt">color=</span>replicate)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>first_gene_symbol, <span class="dt">ncol=</span><span class="dv">1</span>, <span class="dt">scales=</span><span class="st">&quot;free&quot;</span>) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<div class="figure"><span id="fig:graph-genes"></span>
+<img src="learning-about-t-cells-through-data_files/figure-html/graph-genes-1.png" alt="Expression level vs. treatment" width="672" />
+<p class="caption">
+Figure 3.1: Expression level vs. treatment
+</p>
+</div>
+</div>
+<div id="differential-expression-analysis" class="section level2">
+<h2><span class="header-section-number">3.11</span> Differential expression analysis</h2>
 <p>Now we’ll take our new genes-only expression data and put it into a form expected by <code>limma</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">eset_genes &lt;-<span class="st"> </span>eset_tib_genes_only <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">as.data.frame</span>() <span class="op">%&gt;%</span>
@@ -264,7 +312,7 @@ results_genes_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span
 <div class="figure"><span id="fig:volcano"></span>
 <img src="learning-about-t-cells-through-data_files/figure-html/volcano-1.png" alt="Volcano plot made with biobroom" width="672" />
 <p class="caption">
-Figure 3.1: Volcano plot made with biobroom
+Figure 3.2: Volcano plot made with biobroom
 </p>
 </div>
 
