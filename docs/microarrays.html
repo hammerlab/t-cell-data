@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-29">
+<meta name="date" content="2018-09-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -152,10 +152,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(tidyverse)</code></pre></div>
 <div id="overview" class="section level2">
 <h2><span class="header-section-number">3.1</span> Overview</h2>
-<p>We want to find data about gene expression in T cells. Through analysis of this data, we hope to be able to distinguish T cells from other cells, as well as T cell subsets from one another.</p>
-<p>A tibble-centric view of this chapter:</p>
+<p>Our goal is to find some measurement we can perform to distinguish T cells from other cells, as well as T cell subsets from one another. Gene expression as measured by expression microarrays is one candidate measurement we could perform. In this chapter, we’ll seek out open expression microarray data generated from T cells and do some analysis to see if we can distinguish T cells and their subsets using this data.</p>
+<p>We will create several tibbles over the course of this chapter, including:</p>
 <ol style="list-style-type: decimal">
-<li><p><code>c7_tcells</code>: T cell subset of ImmuneSigDB. Each row is a gene set.</p></li>
+<li><p><code>c7_tcells</code>: our best attempt at pulling out the T cell data sets from ImmuneSigDB. Each row is a gene set.</p></li>
+<li><p><code>c7_pubs</code>: publications from which ImmuneSigDB gene sets are derived. Each row is a PMID.</p></li>
 <li><p><code>pGSE2770tidy</code>: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.</p></li>
 <li><p><code>eset_tib_genes</code>: preprocessed expression data for the samples we’re analyzing. “Wide” version of table with one column per sample. Primary key is gene.</p></li>
 <li><p><code>eset_tidy_p</code>: preprocessed expression data joined to phenotype data about the sample. “Tall” version of table. Primary key is (gene, sample).</p></li>
@@ -177,14 +178,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_dir &lt;-<span class="st"> </span><span class="kw">dir_create</span>(<span class="st">&quot;data&quot;</span>)</code></pre></div>
 <p>Put the MSigDB file into this directory at <code>msigdb_files/msigdb_v6.2.xml</code>. We are only interested in the C7 gene set, also known as ImmuneSigDB. For now we are using XPath to extract the relevant data; perhaps we should show how to explore the XML file and construct this query.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">read_xml</span>(fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;msigdb_files/msigdb_v6.2.xml&quot;</span>))
-c7 &lt;-<span class="st"> </span><span class="kw">xml_find_all</span>(x, <span class="st">&quot;//GENESET[contains(@CATEGORY_CODE,&#39;C7&#39;)]&quot;</span>)
-c7_tib &lt;-<span class="st"> </span>c7 <span class="op">%&gt;%</span><span class="st"> </span>as_list <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">attributes</span>(.x))) <span class="op">%&gt;%</span><span class="st"> </span>bind_rows <span class="op">%&gt;%</span><span class="st"> </span>clean_names</code></pre></div>
-<p>Each row in <code>c7_tib</code> represents a gene set from ImmuneSigDB. We filter down to those we suspect relate to T cells, and compute some descriptive statistics about them.</p>
+c7_xml &lt;-<span class="st"> </span><span class="kw">xml_find_all</span>(x, <span class="st">&quot;//GENESET[contains(@CATEGORY_CODE,&#39;C7&#39;)]&quot;</span>)
+c7_tib &lt;-<span class="st"> </span>c7_xml <span class="op">%&gt;%</span><span class="st"> </span>as_list <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(<span class="op">~</span><span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">attributes</span>(.x))) <span class="op">%&gt;%</span><span class="st"> </span>bind_rows <span class="op">%&gt;%</span><span class="st"> </span>clean_names</code></pre></div>
+<p>Each row in <code>c7_tib</code> represents a gene set from ImmuneSigDB. We filter down to those gene sets we suspect relate to T cells.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcell_terms &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;TCELL&quot;</span>, <span class="st">&quot;CD3&quot;</span>, <span class="st">&quot;CD4&quot;</span>, <span class="st">&quot;CD8&quot;</span>)
-c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><span class="st"> </span>rowwise <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">any</span>(<span class="kw">str_detect</span>(standard_name, tcell_terms))) <span class="op">%&gt;%</span><span class="st"> </span>ungroup
-c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(organism) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="co"># Homo sapiens 612, Mus musculus 1124</span>
-<span class="co"># Human T cell publications</span>
-c7_tcells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &#39;Homo sapiens&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">count</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
+c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><span class="st"> </span>rowwise <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">any</span>(<span class="kw">str_detect</span>(standard_name, tcell_terms))) <span class="op">%&gt;%</span><span class="st"> </span>ungroup</code></pre></div>
+<p>We can now explore publications and GEO data sets used to build these gene sets. We are specifically interested in human, not mouse, T cells in this chapter.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c7_pubs &lt;-<span class="st"> </span>c7_tcells <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &quot;Homo sapiens&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">n_genesets =</span> <span class="kw">n</span>(), <span class="dt">n_geoids =</span> <span class="kw">n_distinct</span>(geoid), <span class="dt">geoids =</span> <span class="kw">toString</span>(<span class="kw">unique</span>(geoid))) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n_geoids =</span> <span class="kw">if_else</span>(geoids <span class="op">==</span><span class="st"> &quot;&quot;</span>, 0L, n_geoids)) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n_genesets))</code></pre></div>
+<p>Let’s get some metdata for these papers.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># </span><span class="al">TODO</span><span class="co">(hammer): use reutils or rentrez to pull title and pubdate down</span></code></pre></div>
 </div>
 <div id="data-from-one-paper" class="section level2">
 <h2><span class="header-section-number">3.5</span> Data from one paper</h2>
