@@ -11,6 +11,8 @@ library(oligo)
 library(limma)
 library(biobroom)
 
+library(rentrez)
+
 library(curl)
 library(fs)
 library(urltools)
@@ -83,10 +85,15 @@ c7_pubs <- c7_tcells %>%
   arrange(desc(n_genesets))
 ```
 
-Let's get some metdata for these papers.
+Let's get some metdata for these papers. 
 
 ```{r pub-metadata, dependson='tcell-pubs'}
-# TODO(hammer): use reutils or rentrez to pull title and pubdate down
+pub_meta_esum <- entrez_summary(db = "pubmed", id = c7_pubs$pmid, config = httr::config(http_version = 2))
+pub_meta_list <- extract_from_esummary(pub_meta_esum, c("uid", "pubdate", "title")) %>% array_branch(2)
+pub_meta_vec <- pub_meta_list %>% purrr::map(unlist) %>% flatten_chr()
+pub_meta <- tribble(~pmid, ~pubdate, ~title, !!!pub_meta_vec)
+pub_meta <- pub_meta %>% mutate(pubdate = parse_date_time(pubdate, orders = c("Y", "Ym", "Ymd")))
+c7_pubs <- c7_pubs %>% left_join(pub_meta)
 ```
 
 

@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-09-30">
+<meta name="date" content="2018-10-01">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,6 +142,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(limma)
 <span class="kw">library</span>(biobroom)
 
+<span class="kw">library</span>(rentrez)
+
 <span class="kw">library</span>(curl)
 <span class="kw">library</span>(fs)
 <span class="kw">library</span>(urltools)
@@ -191,7 +193,12 @@ c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><sp
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n_geoids =</span> <span class="kw">if_else</span>(geoids <span class="op">==</span><span class="st"> &quot;&quot;</span>, 0L, n_geoids)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n_genesets))</code></pre></div>
 <p>Let’s get some metdata for these papers.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># </span><span class="al">TODO</span><span class="co">(hammer): use reutils or rentrez to pull title and pubdate down</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pub_meta_esum &lt;-<span class="st"> </span><span class="kw">entrez_summary</span>(<span class="dt">db =</span> <span class="st">&quot;pubmed&quot;</span>, <span class="dt">id =</span> c7_pubs<span class="op">$</span>pmid, <span class="dt">config =</span> httr<span class="op">::</span><span class="kw">config</span>(<span class="dt">http_version =</span> <span class="dv">2</span>))
+pub_meta_list &lt;-<span class="st"> </span><span class="kw">extract_from_esummary</span>(pub_meta_esum, <span class="kw">c</span>(<span class="st">&quot;uid&quot;</span>, <span class="st">&quot;pubdate&quot;</span>, <span class="st">&quot;title&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">array_branch</span>(<span class="dv">2</span>)
+pub_meta_vec &lt;-<span class="st"> </span>pub_meta_list <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(unlist) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">flatten_chr</span>()
+pub_meta &lt;-<span class="st"> </span><span class="kw">tribble</span>(<span class="op">~</span>pmid, <span class="op">~</span>pubdate, <span class="op">~</span>title, <span class="op">!!!</span>pub_meta_vec)
+pub_meta &lt;-<span class="st"> </span>pub_meta <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">pubdate =</span> <span class="kw">parse_date_time</span>(pubdate, <span class="dt">orders =</span> <span class="kw">c</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;Ym&quot;</span>, <span class="st">&quot;Ymd&quot;</span>)))
+c7_pubs &lt;-<span class="st"> </span>c7_pubs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(pub_meta)</code></pre></div>
 </div>
 <div id="data-from-one-paper" class="section level2">
 <h2><span class="header-section-number">3.5</span> Data from one paper</h2>
