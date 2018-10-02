@@ -6,18 +6,25 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```
 
 ```{r libraries}
+# Publication-related
+library(kableExtra)
+
+# Bioconductor
 library(GEOquery)
 library(oligo)
 library(limma)
 library(biobroom)
 
+# Domain specific
 library(rentrez)
 
+# General purpose
 library(curl)
 library(fs)
 library(urltools)
 library(xml2)
 
+# Tidyverse
 library(lubridate)
 library(janitor)
 library(tidyverse)
@@ -77,7 +84,7 @@ c7_tcells <- c7_tib %>% rowwise %>% filter(any(str_detect(standard_name, tcell_t
 We can now explore publications and GEO data sets used to build these gene sets. We are specifically interested in human, not mouse, T cells in this chapter. 
 
 ```{r tcell-pubs, dependson='filter-tcells'}
-c7_pubs <- c7_tcells %>%
+tcell_pubs <- c7_tcells %>%
   filter(organism == "Homo sapiens") %>%
   group_by(pmid) %>%
   summarize(n_genesets = n(), n_geoids = n_distinct(geoid), geoids = toString(unique(geoid))) %>%
@@ -88,13 +95,24 @@ c7_pubs <- c7_tcells %>%
 Let's get some metdata for these papers. 
 
 ```{r pub-metadata, dependson='tcell-pubs'}
-pub_meta_esum <- entrez_summary(db = "pubmed", id = c7_pubs$pmid, config = httr::config(http_version = 2))
+pub_meta_esum <- entrez_summary(db = "pubmed", id = tcell_pubs$pmid, config = httr::config(http_version = 2))
 pub_meta_list <- extract_from_esummary(pub_meta_esum, c("uid", "pubdate", "title")) %>% array_branch(2)
 pub_meta_vec <- pub_meta_list %>% purrr::map(unlist) %>% flatten_chr()
 pub_meta <- tribble(~pmid, ~pubdate, ~title, !!!pub_meta_vec)
 pub_meta <- pub_meta %>% mutate(pubdate = parse_date_time(pubdate, orders = c("Y", "Ym", "Ymd")))
-c7_pubs <- c7_pubs %>% left_join(pub_meta)
+tcell_pubs <- tcell_pubs %>% left_join(pub_meta, by = "pmid")
 ```
+
+```{r tcell-pubs-table, dependson='pub-metadata', fig.cap = "T cell publications", echo = FALSE, results = "markup"}
+tcell_pubs %>%
+  mutate(
+    pmid = text_spec(pmid, link = paste0("https://www.ncbi.nlm.nih.gov/pubmed/", pmid))
+  ) %>%
+  kable(escape = FALSE) %>%
+  column_spec(5, width = "10em") %>%
+  column_spec(6, width = "1000em")
+```
+
 
 
 ## Data from one paper

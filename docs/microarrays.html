@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-10-01">
+<meta name="date" content="2018-10-02">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,6 +47,7 @@
 
 
 
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
 
 
 <style type="text/css">
@@ -137,18 +138,25 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
             <section class="normal" id="section-">
 <div id="microarrays" class="section level1">
 <h1><span class="header-section-number">Chapter 3</span> Microarrays</h1>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(GEOquery)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Publication-related</span>
+<span class="kw">library</span>(kableExtra)
+
+<span class="co"># Bioconductor</span>
+<span class="kw">library</span>(GEOquery)
 <span class="kw">library</span>(oligo)
 <span class="kw">library</span>(limma)
 <span class="kw">library</span>(biobroom)
 
+<span class="co"># Domain specific</span>
 <span class="kw">library</span>(rentrez)
 
+<span class="co"># General purpose</span>
 <span class="kw">library</span>(curl)
 <span class="kw">library</span>(fs)
 <span class="kw">library</span>(urltools)
 <span class="kw">library</span>(xml2)
 
+<span class="co"># Tidyverse</span>
 <span class="kw">library</span>(lubridate)
 <span class="kw">library</span>(janitor)
 <span class="kw">library</span>(tidyverse)</code></pre></div>
@@ -186,19 +194,865 @@ c7_tib &lt;-<span class="st"> </span>c7_xml <span class="op">%&gt;%</span><span 
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcell_terms &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;TCELL&quot;</span>, <span class="st">&quot;CD3&quot;</span>, <span class="st">&quot;CD4&quot;</span>, <span class="st">&quot;CD8&quot;</span>)
 c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><span class="st"> </span>rowwise <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">any</span>(<span class="kw">str_detect</span>(standard_name, tcell_terms))) <span class="op">%&gt;%</span><span class="st"> </span>ungroup</code></pre></div>
 <p>We can now explore publications and GEO data sets used to build these gene sets. We are specifically interested in human, not mouse, T cells in this chapter.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c7_pubs &lt;-<span class="st"> </span>c7_tcells <span class="op">%&gt;%</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcell_pubs &lt;-<span class="st"> </span>c7_tcells <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &quot;Homo sapiens&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">summarize</span>(<span class="dt">n_genesets =</span> <span class="kw">n</span>(), <span class="dt">n_geoids =</span> <span class="kw">n_distinct</span>(geoid), <span class="dt">geoids =</span> <span class="kw">toString</span>(<span class="kw">unique</span>(geoid))) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n_geoids =</span> <span class="kw">if_else</span>(geoids <span class="op">==</span><span class="st"> &quot;&quot;</span>, 0L, n_geoids)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n_genesets))</code></pre></div>
 <p>Let’s get some metdata for these papers.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pub_meta_esum &lt;-<span class="st"> </span><span class="kw">entrez_summary</span>(<span class="dt">db =</span> <span class="st">&quot;pubmed&quot;</span>, <span class="dt">id =</span> c7_pubs<span class="op">$</span>pmid, <span class="dt">config =</span> httr<span class="op">::</span><span class="kw">config</span>(<span class="dt">http_version =</span> <span class="dv">2</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pub_meta_esum &lt;-<span class="st"> </span><span class="kw">entrez_summary</span>(<span class="dt">db =</span> <span class="st">&quot;pubmed&quot;</span>, <span class="dt">id =</span> tcell_pubs<span class="op">$</span>pmid, <span class="dt">config =</span> httr<span class="op">::</span><span class="kw">config</span>(<span class="dt">http_version =</span> <span class="dv">2</span>))
 pub_meta_list &lt;-<span class="st"> </span><span class="kw">extract_from_esummary</span>(pub_meta_esum, <span class="kw">c</span>(<span class="st">&quot;uid&quot;</span>, <span class="st">&quot;pubdate&quot;</span>, <span class="st">&quot;title&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">array_branch</span>(<span class="dv">2</span>)
 pub_meta_vec &lt;-<span class="st"> </span>pub_meta_list <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(unlist) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">flatten_chr</span>()
 pub_meta &lt;-<span class="st"> </span><span class="kw">tribble</span>(<span class="op">~</span>pmid, <span class="op">~</span>pubdate, <span class="op">~</span>title, <span class="op">!!!</span>pub_meta_vec)
 pub_meta &lt;-<span class="st"> </span>pub_meta <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">pubdate =</span> <span class="kw">parse_date_time</span>(pubdate, <span class="dt">orders =</span> <span class="kw">c</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;Ym&quot;</span>, <span class="st">&quot;Ymd&quot;</span>)))
-c7_pubs &lt;-<span class="st"> </span>c7_pubs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(pub_meta)</code></pre></div>
+tcell_pubs &lt;-<span class="st"> </span>tcell_pubs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(pub_meta, <span class="dt">by =</span> <span class="st">&quot;pmid&quot;</span>)</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pmid
+</th>
+<th style="text-align:right;">
+n_genesets
+</th>
+<th style="text-align:right;">
+n_geoids
+</th>
+<th style="text-align:left;">
+geoids
+</th>
+<th style="text-align:left;">
+pubdate
+</th>
+<th style="text-align:left;">
+title
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/14607935" style="     ">14607935</a>
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE2770
+</td>
+<td style="text-align:left;width: 10em; ">
+2003-11-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Identification of novel genes regulated by IL-12, IL-4, or TGF-beta during the early polarization of CD4+ lymphocytes.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/20620947" style="     ">20620947</a>
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE17974
+</td>
+<td style="text-align:left;width: 10em; ">
+2010-06-25
+</td>
+<td style="text-align:left;width: 1000em; ">
+Genome-wide profiling of interleukin-4 and STAT6 transcription factor regulation of human Th2 cell programming.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/15789058" style="     ">15789058</a>
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE22886
+</td>
+<td style="text-align:left;width: 10em; ">
+2005-06-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Immune response in silico (IRIS): immune-specific genes identified from a compendium of microarray expression data.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/16474395" style="     ">16474395</a>
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE3982
+</td>
+<td style="text-align:left;width: 10em; ">
+2006-03-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Positive regulation of immune cell function and inflammatory responses by phosphatase PAC-1.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/15210650" style="     ">15210650</a>
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE1460
+</td>
+<td style="text-align:left;width: 10em; ">
+2004-08-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Gene expression profiles during human CD4+ T cell differentiation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/22434910" style="     ">22434910</a>
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE36476
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-04-10
+</td>
+<td style="text-align:left;width: 1000em; ">
+Signal inhibition by the dual-specific phosphatase 4 impairs T cell-dependent B-cell responses with age.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/15928199" style="     ">15928199</a>
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE22601
+</td>
+<td style="text-align:left;width: 10em; ">
+2005-06-06
+</td>
+<td style="text-align:left;width: 1000em; ">
+New insights on human T cell development by quantitative T cell receptor gene rearrangement studies and gene expression profiling.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/16423401" style="     ">16423401</a>
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE3720
+</td>
+<td style="text-align:left;width: 10em; ">
+2006-05-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Distinct gene expression in human Vdelta1 and Vdelta2 gammadelta T cells following non-TCR agonist stimulation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19464196" style="     ">19464196</a>
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE15659
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-06-19
+</td>
+<td style="text-align:left;width: 1000em; ">
+Functional delineation and differentiation dynamics of human CD4+ T cells expressing the FoxP3 transcription factor.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19568420" style="     ">19568420</a>
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE11057
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-07-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Deconvolution of blood microarray data identifies cellular activation patterns in systemic lupus erythematosus.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/20190146" style="     ">20190146</a>
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE19888
+</td>
+<td style="text-align:left;width: 10em; ">
+2010-04-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Activation of mast cells by trimeric G protein Gi3; coupling to the A3 adenosine receptor directly and upon T cell contact.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21108462" style="     ">21108462</a>
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE17301
+</td>
+<td style="text-align:left;width: 10em; ">
+2010-12-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Effects of IFN-α as a signal-3 cytokine on human naïve and antigen-experienced CD8(+) T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21347372" style="     ">21347372</a>
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE24634
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-02-09
+</td>
+<td style="text-align:left;width: 1000em; ">
+Analysis of the transcriptional program of developing induced regulatory T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/22086415" style="     ">22086415</a>
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+GSE33374, GSE33424, GSE33425
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-01-12
+</td>
+<td style="text-align:left;width: 1000em; ">
+Human MAIT and CD8αα cells develop from a pool of type-17 precommitted CD8+ T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21632718" style="     ">21632718</a>
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE28726
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-07-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+A naive-like population of human CD1d-restricted T cells expressing intermediate levels of promyelocytic leukemia zinc finger.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/18281483" style="     ">18281483</a>
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE8685
+</td>
+<td style="text-align:left;width: 10em; ">
+2008-02-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Differential effects of interleukin-2 and interleukin-15 versus interleukin-21 on CD4+ cutaneous T-cell lymphoma cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/20304822" style="     ">20304822</a>
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE20198
+</td>
+<td style="text-align:left;width: 10em; ">
+2010-05-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Activating transcription factor 3 is a positive regulator of human IFNG gene expression.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21471443" style="     ">21471443</a>
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE26928
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-05-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+CXCR5 expressing human central memory CD4 T cells and their relevance for humoral immune responses.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21926977" style="     ">21926977</a>
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE23321
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-09-18
+</td>
+<td style="text-align:left;width: 1000em; ">
+A human memory T cell subset with stem cell-like properties.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/22715389" style="     ">22715389</a>
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE32901
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-01-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Effector CD4+ T cell expression signatures and immune-mediated disease associated genes.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/18275831" style="     ">18275831</a>
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE10325
+</td>
+<td style="text-align:left;width: 10em; ">
+2008-02-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Combined deficiency of proapoptotic regulators Bim and Fas results in the early onset of systemic autoimmunity.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21768398" style="     ">21768398</a>
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE22025
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-08-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Progesterone promotes differentiation of human cord blood fetal T cells into T regulatory cells but suppresses their differentiation into Th17 cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/15965501" style="     ">15965501</a>
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE8835
+</td>
+<td style="text-align:left;width: 10em; ">
+2005-07-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Chronic lymphocytic leukemia cells induce changes in gene expression of CD4 and CD8 T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19201859" style="     ">19201859</a>
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE13887
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-02-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Activation of mammalian target of rapamycin controls the loss of TCRzeta in lupus T cells through HRES-1/Rab4-regulated lysosomal degradation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19414752" style="     ">19414752</a>
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE14908
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-05-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+A network modeling approach to analysis of the Th2 memory responses underlying human atopic disease.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/18024188" style="     ">18024188</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE7460
+</td>
+<td style="text-align:left;width: 10em; ">
+2007-11-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Foxp3 transcription-factor-dependent and -independent regulation of the regulatory T cell transcriptional signature.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19050264" style="     ">19050264</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE12963
+</td>
+<td style="text-align:left;width: 10em; ">
+2008-12-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Tat-induced FOXO3a is a key mediator of apoptosis in HIV-1-infected human CD4+ T lymphocytes.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19201849" style="     ">19201849</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE13738
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-02-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Human CD4+ memory T cells are preferential targets for bystander activation and apoptosis.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/19698979" style="     ">19698979</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE15735
+</td>
+<td style="text-align:left;width: 10em; ">
+2009-09-04
+</td>
+<td style="text-align:left;width: 1000em; ">
+Genome-wide mapping of HATs and HDACs reveals distinct functions in active and inactive genes.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21383243" style="     ">21383243</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE26495
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-04-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Phenotype, function, and gene expression profiles of programmed death-1(hi) CD8 T cells in healthy human adults.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21968650" style="     ">21968650</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE27291
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-01-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+The gene expression profile of phosphoantigen-specific human γδ T lymphocytes is a blend of αβ T-cell and NK-cell signatures.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/22941246" style="     ">22941246</a>
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE35685
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-10-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Lymphoid priming in human bone marrow begins before expression of CD10 with upregulation of L-selectin.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/16951325" style="     ">16951325</a>
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE5142
+</td>
+<td style="text-align:left;width: 10em; ">
+2006-09-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Mechanisms regulating the proliferative potential of human CD8+ T lymphocytes overexpressing telomerase.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/20890291" style="     ">20890291</a>
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+GSE24026, GSE24081
+</td>
+<td style="text-align:left;width: 10em; ">
+2010-10-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+Transcriptional analysis of HIV-specific CD8+ T cells shows that PD-1 inhibits T cell function by upregulating BATF.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/18081042" style="     ">18081042</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE6566
+</td>
+<td style="text-align:left;width: 10em; ">
+2008-01-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+The strength of T cell stimulation determines IL-7 responsiveness, secondary expansion, and lineage commitment of primed human CD4+IL-7Rhi T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/18270326" style="     ">18270326</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE10463
+</td>
+<td style="text-align:left;width: 10em; ">
+2008-08-15
+</td>
+<td style="text-align:left;width: 1000em; ">
+Activation of the aryl hydrocarbon receptor is essential for mediating the anti-inflammatory effects of a novel low-molecular-weight compound.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21131424" style="     ">21131424</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE23984
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-01-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+The vitamin D analog, TX527, promotes a human CD4+CD25highCD127low regulatory T cell profile and induces a migratory signature specific for homing to sites of inflammation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21551231" style="     ">21551231</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE26156
+</td>
+<td style="text-align:left;width: 10em; ">
+2011-06-30
+</td>
+<td style="text-align:left;width: 1000em; ">
+Modulation of microRNA expression in human T-cell development: targeting of NOTCH3 by miR-150.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/22174157" style="     ">22174157</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE26890
+</td>
+<td style="text-align:left;width: 10em; ">
+2012-02-09
+</td>
+<td style="text-align:left;width: 1000em; ">
+Functional heterogeneity of human effector CD8+ T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/23169781" style="     ">23169781</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE41087
+</td>
+<td style="text-align:left;width: 10em; ">
+2013-02-21
+</td>
+<td style="text-align:left;width: 1000em; ">
+A novel function for FOXP3 in humans: intrinsic regulation of conventional T cells.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/26405566" style="     ">26405566</a>
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+GSE43260
+</td>
+<td style="text-align:left;width: 10em; ">
+2015-08-01
+</td>
+<td style="text-align:left;width: 1000em; ">
+BTLA marks a less-differentiated tumor-infiltrating lymphocyte subset in melanoma with enhanced survival properties.
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="data-from-one-paper" class="section level2">
 <h2><span class="header-section-number">3.5</span> Data from one paper</h2>
