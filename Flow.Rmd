@@ -72,7 +72,7 @@ ggcyto(fr, aes(x='FSC-A', y='SSC-A')) + geom_hex(bins=100) + geom_gate(gate) + g
 ```
 
 
-#### Gating
+### Gating
 
 By repeating the above process for all cell types of interest in the paper, the workflow can be reproduced via a [GatingTemplate](https://www.bioconductor.org/packages/devel/bioc/vignettes/openCyto/inst/doc/HowToWriteCSVTemplate.html) as shown below, which could also be built programmatically instead.  The graphical representation of the template shows how cell types will be recursively defined based on 2 dimensional filters:
 
@@ -119,7 +119,7 @@ registerPlugins(fun=.polyGate, methodName='polyGate',dep=NA)
 gating(gt, gs)
 ```
 
-#### Results
+### Results
 
 Now that the workflow is finished, here is a look at all cell types identified:
 
