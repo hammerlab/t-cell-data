@@ -104,7 +104,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
 <li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a><ul>
 <li class="chapter" data-level="2.1" data-path="flow.html"><a href="flow.html#exploring-flowrepository"><i class="fa fa-check"></i><b>2.1</b> Exploring FlowRepository</a></li>
-<li class="chapter" data-level="2.2" data-path="flow.html"><a href="flow.html#data-from-one-paper"><i class="fa fa-check"></i><b>2.2</b> Data from one paper</a></li>
+<li class="chapter" data-level="2.2" data-path="flow.html"><a href="flow.html#data-from-one-paper"><i class="fa fa-check"></i><b>2.2</b> Data from one paper</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="flow.html"><a href="flow.html#gating"><i class="fa fa-check"></i><b>2.2.1</b> Gating</a></li>
+<li class="chapter" data-level="2.2.2" data-path="flow.html"><a href="flow.html#results"><i class="fa fa-check"></i><b>2.2.2</b> Results</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
 <li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
@@ -439,8 +442,8 @@ fr <span class="op">%&gt;%</span><span class="st"> </span>exprs <span class="op"
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gate &lt;-<span class="st"> </span>openCyto<span class="op">::</span><span class="kw">flowClust.2d</span>(fr, <span class="st">&#39;FSC-A&#39;</span>, <span class="st">&#39;SSC-A&#39;</span>, <span class="dt">K=</span><span class="dv">3</span>, <span class="dt">quantile=</span>.<span class="dv">9</span>)
 <span class="kw">ggcyto</span>(fr, <span class="kw">aes</span>(<span class="dt">x=</span><span class="st">&#39;FSC-A&#39;</span>, <span class="dt">y=</span><span class="st">&#39;SSC-A&#39;</span>)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_hex</span>(<span class="dt">bins=</span><span class="dv">100</span>) <span class="op">+</span><span class="st"> </span><span class="kw">geom_gate</span>(gate) <span class="op">+</span><span class="st"> </span><span class="kw">geom_stats</span>()</code></pre></div>
 <p><img src="Flow_files/figure-html/plot-fsc-ssc-1.png" width="672" /></p>
-<div id="gating" class="section level4">
-<h4><span class="header-section-number">2.2.0.1</span> Gating</h4>
+<div id="gating" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Gating</h3>
 <p>By repeating the above process for all cell types of interest in the paper, the workflow can be reproduced via a <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/openCyto/inst/doc/HowToWriteCSVTemplate.html">GatingTemplate</a> as shown below, which could also be built programmatically instead. The graphical representation of the template shows how cell types will be recursively defined based on 2 dimensional filters:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> &#39;alias,pop,parent,dims,gating_method,gating_args,collapseDataForGating,groupBy,preprocessing_method,preprocessing_args</span>
 <span class="st">Live,+,root,&quot;FSC-A,525/50Violet-A&quot;,&quot;polyGate&quot;,&quot;x=c(0,3e5,3e5,1e5,.5e5,0),y=c(0,0,2.3,2.3,2,1.5)&quot;,,,,</span>
@@ -480,8 +483,8 @@ gs &lt;-<span class="st"> </span><span class="kw">transform</span>(<span class="
 <span class="co"># Apply the gating to the data (this may take a couple minutes)</span>
 <span class="kw">gating</span>(gt, gs)</code></pre></div>
 </div>
-<div id="results" class="section level4">
-<h4><span class="header-section-number">2.2.0.2</span> Results</h4>
+<div id="results" class="section level3">
+<h3><span class="header-section-number">2.2.2</span> Results</h3>
 <p>Now that the workflow is finished, here is a look at all cell types identified:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">autoplot</span>(gs[[<span class="dv">1</span>]], <span class="dt">strip.text =</span> <span class="st">&quot;gate&quot;</span>, <span class="dt">bins=</span><span class="dv">100</span>, <span class="dt">merge=</span>F, <span class="dt">axis_inverse_trans=</span>F) <span class="op">+</span><span class="st"> </span>flow_theme</code></pre></div>
 <p><img src="Flow_files/figure-html/plot-cell-types-1.png" width="768" /></p>
