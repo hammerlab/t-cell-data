@@ -1,5 +1,134 @@
 # Flow {#flow}
 
-The most common way to profile T cells: flow cytometry. It's actually a single-cell method!
+```{r flow-options, include=FALSE}
+library(knitr)
+opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
+```
 
-We'll examine the OMIP data available from FlowRepository.
+```{r flow-libraries}
+# Bioconductor
+library(FlowRepositoryR)
+library(flowCore)
+library(openCyto)
+library(ggcyto)
+
+# Tidyverse
+library(fs)
+library(tidyverse)
+```
+
+```{r flow-theme, include=FALSE}
+# Set common ggplot theme
+flow_theme <- theme_bw() + theme(
+  panel.grid.minor.x=element_blank(),
+  panel.grid.minor.y=element_blank(),
+  panel.grid.major.x=element_blank(),
+  panel.grid.major.y=element_blank()
+)
+```
+
+We'll examine the OMIP panel data available from [FlowRepository](https://flowrepository.org/), using the client library [FlowRepositoryR](https://bioconductor.org/packages/release/bioc/html/FlowRepositoryR.html), and demonstrate phenotypic differences between T cell types based on the protein expression levels captured in these assays.
+
+To aid in identifying and visualizing these different cell populations, a variety of tools built on [flowCore](https://bioconductor.org/packages/release/bioc/html/FlowRepositoryR.html) will be used and in particular, [openCyto](https://bioconductor.org/packages/release/bioc/html/openCyto.html) will enable us to model and manipulate the workflows used in the OMIP publications to identify T cell types.
+
+
+## Exploring FlowRepository
+
+TBD
+
+- Attempt to show consolidated metadata from all OMIP datasets
+  - This will likely need to involve downloading the data to demonstrate anything useful (i.e. which markers are present)
+- Show markers available by datasets relating to Human t-cells (not sure how to filter to human only yet)
+
+
+## Data from one paper
+
+Initial Example: [OMIP-021 Innate-like T-cell Panel (FR-FCM-ZZ9H)](https://flowrepository.org/id/FR-FCM-ZZ9H)
+
+```{r load-OMIP-data, results='asis'}
+data_dir <- dir_create("data/flow")
+dataset_id <- "FR-FCM-ZZ9H"
+dataset_path <- fs::path(data_dir, dataset_id)
+dataset <- flowRep.get(dataset_id)
+
+if (!dir_exists(dataset_path)) 
+  dataset <- download(dataset, dirpath=dataset_path, only.files="Donor.*fcs", show.progress=F)
+fr <- read.FCS(fs::path(getwd(), dataset_path, 'Donor1.fcs'))
+fr %>% exprs %>% data.frame %>% head(10) %>% knitr::kable(format.args = list(digits=3))
+```
+
+In this dataset, one way to identify lymphocytes is by looking at modes in the relationship between side and forward scatter:
+
+```{r example-biplot}
+ggcyto(fr, aes(x='FSC-A', y='SSC-A')) + geom_hex(bins=100)
+```
+
+
+To identify the lymphocyte cells above, ```openCyto``` gating can be used to select the largest cluster of cells automatically and visualize what fraction of the population these cells constitute:
+
+```{r plot-fsc-ssc}
+gate <- openCyto::flowClust.2d(fr, 'FSC-A', 'SSC-A', K=3, quantile=.9)
+ggcyto(fr, aes(x='FSC-A', y='SSC-A')) + geom_hex(bins=100) + geom_gate(gate) + geom_stats()
+```
+
+
+#### Gating
+
+By repeating the above process for all cell types of interest in the paper, the workflow can be reproduced via a [GatingTemplate](https://www.bioconductor.org/packages/devel/bioc/vignettes/openCyto/inst/doc/HowToWriteCSVTemplate.html) as shown below, which could also be built programmatically instead.  The graphical representation of the template shows how cell types will be recursively defined based on 2 dimensional filters:
+
+```{r plot-gating-template, results='asis'}
+template <- 'alias,pop,parent,dims,gating_method,gating_args,collapseDataForGating,groupBy,preprocessing_method,preprocessing_args
+Live,+,root,"FSC-A,525/50Violet-A","polyGate","x=c(0,3e5,3e5,1e5,.5e5,0),y=c(0,0,2.3,2.3,2,1.5)",,,,
+Lymphocytes,+,Live,"FSC-A,SSC-A","flowClust.2d","K=3,quantile=.95",,,,
+Singlets,+,Lymphocytes,"FSC-A,FSC-H","singletGate","maxit=1000,wider_gate=T,prediction_level=.999999999",,,,
+gdTCells,+,Singlets,"670/30Violet-A,530/30Blue.A","flowClust.2d","K=3,target=c(2.5,2.5)",,,,
+abTCells,+,Singlets,"670/30Violet-A,530/30Blue.A","flowClust.2d","K=3,target=c(2.5,1),quantile=0.95",,,,
+maiTCells,+,abTCells,"582/15Yellow.A,540/30Violet.A","polyGate","x=c(2.7,5,5,2.7),y=c(2.5,2.5,5,5)",,,,'
+template_path <- file_temp(ext='.csv')
+write_lines(template, template_path)
+gt <- gatingTemplate(template_path)
+plot(gt)
+```
+
+The above template only outlines the gating workflow but to apply it to our data, these are the common steps:
+
+- Apply compensation to the raw FCS data if necessary (not necessary in this case as the authors did this beforehand)
+- Define channel transformations to make gating and visualization possible
+- Define any custom gating functions needed in the workflow, which is particularly useful for setting manual gates
+- Apply the gating template to the data at hand, which in this case is represented as a ```flowFrame``` but could also be a ```flowSet``` representing a collection of experiments
+
+Here is the realization of these steps for this data specifically:
+
+```{r plot-poly-gate}
+# Define logical transformation for all fluorescent channels and build a "GatingSet", which is a wrapper
+# class that binds numeric data with transformations and gating information
+transformer <- transformerList(colnames(fr@description$SPILL), logicle_trans())
+gs <- transform(GatingSet(flowSet(fr)), transformer)
+
+# Define a custom polygon gating function, that is used in our template to deal with situations
+# that are difficult to define an automated gate for
+.polyGate <- function(fr, pp_res, channels, filterId="polygate", ...){ 
+  args <- list(...)
+  g <- data.frame(x=args$x, y=args$y)
+  colnames(g) <- channels
+  flowCore::polygonGate(.gate=g, filterId=filterId)
+}
+registerPlugins(fun=.polyGate, methodName='polyGate',dep=NA)
+
+# Apply the gating to the data (this may take a couple minutes)
+gating(gt, gs)
+```
+
+#### Results
+
+Now that the workflow is finished, here is a look at all cell types identified:
+
+```{r plot-cell-types, fig.height=8, fig.width=8}
+autoplot(gs[[1]], strip.text = "gate", bins=100, merge=F, axis_inverse_trans=F) + flow_theme
+```
+
+This should then be comparable to what was in the [OMIP-021 publication](https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22475), and here are relevant figures demonstrating the similarity of the cell subsets captured:
+
+![optional caption text](https://drive.google.com/uc?export=view&id=1LJ9kSIHO-PnqOy3BnP1cy0t93uw2BMrF)
+
+

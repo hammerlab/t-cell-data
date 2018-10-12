@@ -1,11 +1,11 @@
 # Microarrays {#microarrays}
 
-```{r global-options, include=FALSE}
+```{r microarray-options, include=FALSE}
 library(knitr)
 opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```
 
-```{r libraries}
+```{r microarray-libraries}
 # Publication-related
 library(kableExtra)
 
@@ -20,14 +20,14 @@ library(rentrez)
 
 # General purpose
 library(curl)
-library(fs)
 library(urltools)
 library(xml2)
 
 # Tidyverse
+library(fs)
 library(lubridate)
 library(janitor)
-library(tidyverse)
+devtools::reload(devtools::inst("tidyverse")) # to make sure dplyr names win
 ```
 
 ## Overview
@@ -87,7 +87,7 @@ We can now explore publications and GEO data sets used to build these gene sets.
 tcell_pubs <- c7_tcells %>%
   filter(organism == "Homo sapiens") %>%
   group_by(pmid) %>%
-  summarize(n_genesets = n(), n_geoids = n_distinct(geoid), geoids = toString(unique(geoid))) %>%
+  dplyr::summarize(n_genesets = n(), n_geoids = n_distinct(geoid), geoids = toString(unique(geoid))) %>%
   mutate(n_geoids = if_else(geoids == "", 0L, n_geoids)) %>%
   arrange(desc(n_genesets))
 ```
