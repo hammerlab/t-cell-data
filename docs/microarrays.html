@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-10-02">
+<meta name="date" content="2018-10-12">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -102,13 +102,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a></li>
+<li class="chapter" data-level="2" data-path="flow.html"><a href="flow.html"><i class="fa fa-check"></i><b>2</b> Flow</a><ul>
+<li class="chapter" data-level="2.1" data-path="flow.html"><a href="flow.html#exploring-flowrepository"><i class="fa fa-check"></i><b>2.1</b> Exploring FlowRepository</a></li>
+<li class="chapter" data-level="2.2" data-path="flow.html"><a href="flow.html#data-from-one-paper"><i class="fa fa-check"></i><b>2.2</b> Data from one paper</a></li>
+</ul></li>
 <li class="chapter" data-level="3" data-path="microarrays.html"><a href="microarrays.html"><i class="fa fa-check"></i><b>3</b> Microarrays</a><ul>
 <li class="chapter" data-level="3.1" data-path="microarrays.html"><a href="microarrays.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
 <li class="chapter" data-level="3.2" data-path="microarrays.html"><a href="microarrays.html#expression-profiling-with-microarrays"><i class="fa fa-check"></i><b>3.2</b> Expression profiling with microarrays</a></li>
 <li class="chapter" data-level="3.3" data-path="microarrays.html"><a href="microarrays.html#t-cell-expression-profiles"><i class="fa fa-check"></i><b>3.3</b> T cell expression profiles</a></li>
 <li class="chapter" data-level="3.4" data-path="microarrays.html"><a href="microarrays.html#exploring-immunesigdb"><i class="fa fa-check"></i><b>3.4</b> Exploring ImmuneSigDB</a></li>
-<li class="chapter" data-level="3.5" data-path="microarrays.html"><a href="microarrays.html#data-from-one-paper"><i class="fa fa-check"></i><b>3.5</b> Data from one paper</a></li>
+<li class="chapter" data-level="3.5" data-path="microarrays.html"><a href="microarrays.html#data-from-one-paper-1"><i class="fa fa-check"></i><b>3.5</b> Data from one paper</a></li>
 <li class="chapter" data-level="3.6" data-path="microarrays.html"><a href="microarrays.html#data-from-one-gene-set"><i class="fa fa-check"></i><b>3.6</b> Data from one gene set</a></li>
 <li class="chapter" data-level="3.7" data-path="microarrays.html"><a href="microarrays.html#load-expression-data"><i class="fa fa-check"></i><b>3.7</b> Load expression data</a></li>
 <li class="chapter" data-level="3.8" data-path="microarrays.html"><a href="microarrays.html#preprocess-expression-data"><i class="fa fa-check"></i><b>3.8</b> Preprocess expression data</a></li>
@@ -152,11 +155,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <span class="co"># General purpose</span>
 <span class="kw">library</span>(curl)
-<span class="kw">library</span>(fs)
 <span class="kw">library</span>(urltools)
 <span class="kw">library</span>(xml2)
 
 <span class="co"># Tidyverse</span>
+<span class="kw">library</span>(fs)
 <span class="kw">library</span>(lubridate)
 <span class="kw">library</span>(janitor)
 <span class="kw">library</span>(tidyverse)</code></pre></div>
@@ -197,7 +200,7 @@ c7_tcells &lt;-<span class="st"> </span>c7_tib <span class="op">%&gt;%</span><sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tcell_pubs &lt;-<span class="st"> </span>c7_tcells <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(organism <span class="op">==</span><span class="st"> &quot;Homo sapiens&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(pmid) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">n_genesets =</span> <span class="kw">n</span>(), <span class="dt">n_geoids =</span> <span class="kw">n_distinct</span>(geoid), <span class="dt">geoids =</span> <span class="kw">toString</span>(<span class="kw">unique</span>(geoid))) <span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarize</span>(<span class="dt">n_genesets =</span> <span class="kw">n</span>(), <span class="dt">n_geoids =</span> <span class="kw">n_distinct</span>(geoid), <span class="dt">geoids =</span> <span class="kw">toString</span>(<span class="kw">unique</span>(geoid))) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n_geoids =</span> <span class="kw">if_else</span>(geoids <span class="op">==</span><span class="st"> &quot;&quot;</span>, 0L, n_geoids)) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n_genesets))</code></pre></div>
 <p>Let’s get some metdata for these papers.</p>
@@ -1054,7 +1057,7 @@ BTLA marks a less-differentiated tumor-infiltrating lymphocyte subset in melanom
 </tbody>
 </table>
 </div>
-<div id="data-from-one-paper" class="section level2">
+<div id="data-from-one-paper-1" class="section level2">
 <h2><span class="header-section-number">3.5</span> Data from one paper</h2>
 <p>First, we download data for GSE2770 from <a href="https://www.ncbi.nlm.nih.gov/geo/">GEO</a>. There are 3 elements in this list, 1 for each platform.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_dir &lt;-<span class="st"> </span>fs<span class="op">::</span><span class="kw">path</span>(data_dir, <span class="st">&quot;series_matrix_files&quot;</span>)
@@ -1154,7 +1157,7 @@ eset_tidy_p &lt;-<span class="st"> </span>eset_tidy <span class="op">%&gt;%</spa
 <span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>first_gene_symbol, <span class="dt">ncol=</span><span class="dv">1</span>, <span class="dt">scales=</span><span class="st">&quot;free&quot;</span>) <span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <div class="figure"><span id="fig:graph-genes"></span>
-<img src="learning-about-t-cells-through-data_files/figure-html/graph-genes-1.png" alt="Expression level vs. treatment" width="672" />
+<img src="Microarrays_files/figure-html/graph-genes-1.png" alt="Expression level vs. treatment" width="672" />
 <p class="caption">
 Figure 3.1: Expression level vs. treatment
 </p>
@@ -1178,7 +1181,7 @@ results_genes &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit
 results_genes_tib &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(results_genes, <span class="dt">rownames =</span> <span class="st">&quot;gene&quot;</span>)</code></pre></div>
 <p>Let’s look at our results.</p>
 <div class="figure"><span id="fig:volcano"></span>
-<img src="learning-about-t-cells-through-data_files/figure-html/volcano-1.png" alt="Volcano plot made with biobroom" width="672" />
+<img src="Microarrays_files/figure-html/volcano-1.png" alt="Volcano plot made with biobroom" width="672" />
 <p class="caption">
 Figure 3.2: Volcano plot made with biobroom
 </p>

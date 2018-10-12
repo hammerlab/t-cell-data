@@ -27,7 +27,7 @@ library(xml2)
 library(fs)
 library(lubridate)
 library(janitor)
-devtools::reload(devtools::inst("tidyverse")) # to make sure dplyr names win
+library(tidyverse)
 ```
 
 ## Overview

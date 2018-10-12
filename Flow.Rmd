@@ -51,7 +51,7 @@ dataset_id <- "FR-FCM-ZZ9H"
 dataset_path <- fs::path(data_dir, dataset_id)
 dataset <- flowRep.get(dataset_id)
 
-if (!dir_exists(dataset_path)) 
+if (!dir_exists(dataset_path))
   dataset <- download(dataset, dirpath=dataset_path, only.files="Donor.*fcs", show.progress=F)
 fr <- read.FCS(fs::path(getwd(), dataset_path, 'Donor1.fcs'))
 fr %>% exprs %>% data.frame %>% head(10) %>% knitr::kable(format.args = list(digits=3))
@@ -107,7 +107,7 @@ gs <- transform(GatingSet(flowSet(fr)), transformer)
 
 # Define a custom polygon gating function, that is used in our template to deal with situations
 # that are difficult to define an automated gate for
-.polyGate <- function(fr, pp_res, channels, filterId="polygate", ...){ 
+.polyGate <- function(fr, pp_res, channels, filterId="polygate", ...){
   args <- list(...)
   g <- data.frame(x=args$x, y=args$y)
   colnames(g) <- channels
