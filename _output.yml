@@ -1,3 +1,4 @@
 bookdown::gitbook:
+  table_css: false
   config:
     sharing: no

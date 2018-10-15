@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Learning About T Cells Through Data</title>
   <meta name="description" content="An examination of T cells using several open data sets.">
-  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown  and GitBook 2.6.7">
 
   <meta property="og:title" content="Learning About T Cells Through Data" />
   <meta property="og:type" content="book" />
@@ -25,7 +25,7 @@
 <meta name="author" content="Hammer Lab">
 
 
-<meta name="date" content="2018-10-12">
+<meta name="date" content="2018-10-15">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -48,6 +48,7 @@
 
 
 <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/bsTable-3.3.7/bootstrapTable.min.css" rel="stylesheet" />
 
 
 <style type="text/css">
@@ -146,6 +147,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">Chapter 3</span> Microarrays</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Publication-related</span>
 <span class="kw">library</span>(kableExtra)
+<span class="kw">options</span>(<span class="dt">kableExtra.html.bsTable =</span> T)
 
 <span class="co"># Bioconductor</span>
 <span class="kw">library</span>(GEOquery)
@@ -213,7 +215,7 @@ pub_meta_vec &lt;-<span class="st"> </span>pub_meta_list <span class="op">%&gt;%
 pub_meta &lt;-<span class="st"> </span><span class="kw">tribble</span>(<span class="op">~</span>pmid, <span class="op">~</span>pubdate, <span class="op">~</span>title, <span class="op">!!!</span>pub_meta_vec)
 pub_meta &lt;-<span class="st"> </span>pub_meta <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">pubdate =</span> <span class="kw">parse_date_time</span>(pubdate, <span class="dt">orders =</span> <span class="kw">c</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;Ym&quot;</span>, <span class="st">&quot;Ymd&quot;</span>)))
 tcell_pubs &lt;-<span class="st"> </span>tcell_pubs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(pub_meta, <span class="dt">by =</span> <span class="st">&quot;pmid&quot;</span>)</code></pre></div>
-<table>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:left;">
@@ -253,7 +255,7 @@ GSE2770
 <td style="text-align:left;width: 10em; ">
 2003-11-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Identification of novel genes regulated by IL-12, IL-4, or TGF-beta during the early polarization of CD4+ lymphocytes.
 </td>
 </tr>
@@ -273,7 +275,7 @@ GSE17974
 <td style="text-align:left;width: 10em; ">
 2010-06-25
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Genome-wide profiling of interleukin-4 and STAT6 transcription factor regulation of human Th2 cell programming.
 </td>
 </tr>
@@ -293,7 +295,7 @@ GSE22886
 <td style="text-align:left;width: 10em; ">
 2005-06-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Immune response in silico (IRIS): immune-specific genes identified from a compendium of microarray expression data.
 </td>
 </tr>
@@ -313,7 +315,7 @@ GSE3982
 <td style="text-align:left;width: 10em; ">
 2006-03-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Positive regulation of immune cell function and inflammatory responses by phosphatase PAC-1.
 </td>
 </tr>
@@ -333,7 +335,7 @@ GSE1460
 <td style="text-align:left;width: 10em; ">
 2004-08-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Gene expression profiles during human CD4+ T cell differentiation.
 </td>
 </tr>
@@ -353,7 +355,7 @@ GSE36476
 <td style="text-align:left;width: 10em; ">
 2012-04-10
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Signal inhibition by the dual-specific phosphatase 4 impairs T cell-dependent B-cell responses with age.
 </td>
 </tr>
@@ -373,7 +375,7 @@ GSE22601
 <td style="text-align:left;width: 10em; ">
 2005-06-06
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 New insights on human T cell development by quantitative T cell receptor gene rearrangement studies and gene expression profiling.
 </td>
 </tr>
@@ -393,7 +395,7 @@ GSE3720
 <td style="text-align:left;width: 10em; ">
 2006-05-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Distinct gene expression in human Vdelta1 and Vdelta2 gammadelta T cells following non-TCR agonist stimulation.
 </td>
 </tr>
@@ -413,7 +415,7 @@ GSE15659
 <td style="text-align:left;width: 10em; ">
 2009-06-19
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Functional delineation and differentiation dynamics of human CD4+ T cells expressing the FoxP3 transcription factor.
 </td>
 </tr>
@@ -433,7 +435,7 @@ GSE11057
 <td style="text-align:left;width: 10em; ">
 2009-07-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Deconvolution of blood microarray data identifies cellular activation patterns in systemic lupus erythematosus.
 </td>
 </tr>
@@ -453,7 +455,7 @@ GSE19888
 <td style="text-align:left;width: 10em; ">
 2010-04-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Activation of mast cells by trimeric G protein Gi3; coupling to the A3 adenosine receptor directly and upon T cell contact.
 </td>
 </tr>
@@ -473,7 +475,7 @@ GSE17301
 <td style="text-align:left;width: 10em; ">
 2010-12-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Effects of IFN-α as a signal-3 cytokine on human naïve and antigen-experienced CD8(+) T cells.
 </td>
 </tr>
@@ -493,7 +495,7 @@ GSE24634
 <td style="text-align:left;width: 10em; ">
 2011-02-09
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Analysis of the transcriptional program of developing induced regulatory T cells.
 </td>
 </tr>
@@ -513,7 +515,7 @@ GSE33374, GSE33424, GSE33425
 <td style="text-align:left;width: 10em; ">
 2012-01-12
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Human MAIT and CD8αα cells develop from a pool of type-17 precommitted CD8+ T cells.
 </td>
 </tr>
@@ -533,7 +535,7 @@ GSE28726
 <td style="text-align:left;width: 10em; ">
 2011-07-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 A naive-like population of human CD1d-restricted T cells expressing intermediate levels of promyelocytic leukemia zinc finger.
 </td>
 </tr>
@@ -553,7 +555,7 @@ GSE8685
 <td style="text-align:left;width: 10em; ">
 2008-02-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Differential effects of interleukin-2 and interleukin-15 versus interleukin-21 on CD4+ cutaneous T-cell lymphoma cells.
 </td>
 </tr>
@@ -573,7 +575,7 @@ GSE20198
 <td style="text-align:left;width: 10em; ">
 2010-05-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Activating transcription factor 3 is a positive regulator of human IFNG gene expression.
 </td>
 </tr>
@@ -593,7 +595,7 @@ GSE26928
 <td style="text-align:left;width: 10em; ">
 2011-05-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 CXCR5 expressing human central memory CD4 T cells and their relevance for humoral immune responses.
 </td>
 </tr>
@@ -613,7 +615,7 @@ GSE23321
 <td style="text-align:left;width: 10em; ">
 2011-09-18
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 A human memory T cell subset with stem cell-like properties.
 </td>
 </tr>
@@ -633,7 +635,7 @@ GSE32901
 <td style="text-align:left;width: 10em; ">
 2012-01-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Effector CD4+ T cell expression signatures and immune-mediated disease associated genes.
 </td>
 </tr>
@@ -653,7 +655,7 @@ GSE10325
 <td style="text-align:left;width: 10em; ">
 2008-02-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Combined deficiency of proapoptotic regulators Bim and Fas results in the early onset of systemic autoimmunity.
 </td>
 </tr>
@@ -673,7 +675,7 @@ GSE22025
 <td style="text-align:left;width: 10em; ">
 2011-08-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Progesterone promotes differentiation of human cord blood fetal T cells into T regulatory cells but suppresses their differentiation into Th17 cells.
 </td>
 </tr>
@@ -693,7 +695,7 @@ GSE8835
 <td style="text-align:left;width: 10em; ">
 2005-07-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Chronic lymphocytic leukemia cells induce changes in gene expression of CD4 and CD8 T cells.
 </td>
 </tr>
@@ -713,7 +715,7 @@ GSE13887
 <td style="text-align:left;width: 10em; ">
 2009-02-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Activation of mammalian target of rapamycin controls the loss of TCRzeta in lupus T cells through HRES-1/Rab4-regulated lysosomal degradation.
 </td>
 </tr>
@@ -733,7 +735,7 @@ GSE14908
 <td style="text-align:left;width: 10em; ">
 2009-05-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 A network modeling approach to analysis of the Th2 memory responses underlying human atopic disease.
 </td>
 </tr>
@@ -753,7 +755,7 @@ GSE7460
 <td style="text-align:left;width: 10em; ">
 2007-11-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Foxp3 transcription-factor-dependent and -independent regulation of the regulatory T cell transcriptional signature.
 </td>
 </tr>
@@ -773,7 +775,7 @@ GSE12963
 <td style="text-align:left;width: 10em; ">
 2008-12-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Tat-induced FOXO3a is a key mediator of apoptosis in HIV-1-infected human CD4+ T lymphocytes.
 </td>
 </tr>
@@ -793,7 +795,7 @@ GSE13738
 <td style="text-align:left;width: 10em; ">
 2009-02-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Human CD4+ memory T cells are preferential targets for bystander activation and apoptosis.
 </td>
 </tr>
@@ -813,7 +815,7 @@ GSE15735
 <td style="text-align:left;width: 10em; ">
 2009-09-04
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Genome-wide mapping of HATs and HDACs reveals distinct functions in active and inactive genes.
 </td>
 </tr>
@@ -833,7 +835,7 @@ GSE26495
 <td style="text-align:left;width: 10em; ">
 2011-04-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Phenotype, function, and gene expression profiles of programmed death-1(hi) CD8 T cells in healthy human adults.
 </td>
 </tr>
@@ -853,7 +855,7 @@ GSE27291
 <td style="text-align:left;width: 10em; ">
 2012-01-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 The gene expression profile of phosphoantigen-specific human γδ T lymphocytes is a blend of αβ T-cell and NK-cell signatures.
 </td>
 </tr>
@@ -873,7 +875,7 @@ GSE35685
 <td style="text-align:left;width: 10em; ">
 2012-10-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Lymphoid priming in human bone marrow begins before expression of CD10 with upregulation of L-selectin.
 </td>
 </tr>
@@ -893,7 +895,7 @@ GSE5142
 <td style="text-align:left;width: 10em; ">
 2006-09-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Mechanisms regulating the proliferative potential of human CD8+ T lymphocytes overexpressing telomerase.
 </td>
 </tr>
@@ -913,7 +915,7 @@ GSE24026, GSE24081
 <td style="text-align:left;width: 10em; ">
 2010-10-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Transcriptional analysis of HIV-specific CD8+ T cells shows that PD-1 inhibits T cell function by upregulating BATF.
 </td>
 </tr>
@@ -933,7 +935,7 @@ GSE6566
 <td style="text-align:left;width: 10em; ">
 2008-01-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 The strength of T cell stimulation determines IL-7 responsiveness, secondary expansion, and lineage commitment of primed human CD4+IL-7Rhi T cells.
 </td>
 </tr>
@@ -953,7 +955,7 @@ GSE10463
 <td style="text-align:left;width: 10em; ">
 2008-08-15
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Activation of the aryl hydrocarbon receptor is essential for mediating the anti-inflammatory effects of a novel low-molecular-weight compound.
 </td>
 </tr>
@@ -973,7 +975,7 @@ GSE23984
 <td style="text-align:left;width: 10em; ">
 2011-01-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 The vitamin D analog, TX527, promotes a human CD4+CD25highCD127low regulatory T cell profile and induces a migratory signature specific for homing to sites of inflammation.
 </td>
 </tr>
@@ -993,7 +995,7 @@ GSE26156
 <td style="text-align:left;width: 10em; ">
 2011-06-30
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Modulation of microRNA expression in human T-cell development: targeting of NOTCH3 by miR-150.
 </td>
 </tr>
@@ -1013,7 +1015,7 @@ GSE26890
 <td style="text-align:left;width: 10em; ">
 2012-02-09
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 Functional heterogeneity of human effector CD8+ T cells.
 </td>
 </tr>
@@ -1033,7 +1035,7 @@ GSE41087
 <td style="text-align:left;width: 10em; ">
 2013-02-21
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 A novel function for FOXP3 in humans: intrinsic regulation of conventional T cells.
 </td>
 </tr>
@@ -1053,7 +1055,7 @@ GSE43260
 <td style="text-align:left;width: 10em; ">
 2015-08-01
 </td>
-<td style="text-align:left;width: 1000em; ">
+<td style="text-align:left;width: 100em; ">
 BTLA marks a less-differentiated tumor-infiltrating lymphocyte subset in melanoma with enhanced survival properties.
 </td>
 </tr>

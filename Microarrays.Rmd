@@ -8,6 +8,7 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```{r microarray-libraries}
 # Publication-related
 library(kableExtra)
+options(kableExtra.html.bsTable = T)
 
 # Bioconductor
 library(GEOquery)
@@ -109,8 +110,11 @@ tcell_pubs %>%
     pmid = text_spec(pmid, link = paste0("https://www.ncbi.nlm.nih.gov/pubmed/", pmid))
   ) %>%
   kable(escape = FALSE) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed")
+  ) %>%
   column_spec(5, width = "10em") %>%
-  column_spec(6, width = "1000em")
+  column_spec(6, width = "100em")
 ```
 
 
