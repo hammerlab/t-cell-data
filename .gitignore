@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 *.rds
-_book
-_bookdown_files
+data/
+_book/
+_bookdown_files/

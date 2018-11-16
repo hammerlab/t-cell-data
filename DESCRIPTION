@@ -7,9 +7,12 @@ Imports:
   knitr,
   rentrez,
   curl,
+  httr,
   urltools,
   xml2,
   fs,
   lubridate,
   janitor,
   tidyverse
+biocViews:
+  GEOquery

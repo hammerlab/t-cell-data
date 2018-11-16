@@ -6,11 +6,15 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```
 
 ```{r finding-data-libraries}
+# Bioconductor
+library(GEOquery)
+
 # Domain specific
 library(rentrez)
 
 # General purpose
 library(curl)
+library(httr)
 library(urltools)
 library(xml2)
 
@@ -19,4 +23,37 @@ library(fs)
 library(lubridate)
 library(janitor)
 library(tidyverse)
+```
+
+## Managing downloads
+Let's put all of our downloaded data into a single directory.
+
+```{r create-data-dir}
+data_dir <- dir_create("data")
+```
+
+## Exploring ImmuneSigDB
+
+What's in ImmuneSigDB? To find out, [register](http://software.broadinstitute.org/gsea/register.jsp) with GSEA and download the "Current MSigDB xml file"; at the time of this writing, that's `msigdb_v6.2.xml`.
+
+```{r download-msigdb}
+download_dir <- fs::path(data_dir, "msigdb_files")
+msigdb_file <- fs::path(download_dir, "msigdb.xml")
+
+if (!dir_exists(download_dir)) {
+  dir_create(download_dir)
+  login_url <- "http://software.broadinstitute.org/gsea/j_spring_security_check"
+  login_info <- list(j_username = "jeff.hammerbacher@gmail.com", j_password = "password")
+  msigdb_url <- "http://software.broadinstitute.org/gsea/msigdb/download_file.jsp?filePath=/resources/msigdb/6.2/msigdb_v6.2.xml"
+  POST(login_url, body = login_info, encode = "form")
+  GET(msigdb_url, write_disk(msigdb_file), progress())
+}
+```
+
+We are only interested in the C7 gene set, also known as ImmuneSigDB. For now we are using XPath to extract the relevant data; perhaps we should show how to explore the XML file and construct this query.
+
+```{r extract-c7, dependson='create-data-dir'}
+x <- read_xml(msigdb_file)
+c7_xml <- xml_find_all(x, "//GENESET[contains(@CATEGORY_CODE,'C7')]")
+c7_tib <- c7_xml %>% as_list %>% purrr::map(~ as_tibble(attributes(.x))) %>% bind_rows %>% clean_names
 ```

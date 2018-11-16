@@ -122,7 +122,7 @@ tcell_pubs %>%
 ## Data from one paper
 First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/). There are 3 elements in this list, 1 for each platform.
 
-```{r getgeo-gse2770, dependson='create-data-dir'}
+```{r get-gse2770, dependson='create-data-dir'}
 download_dir <- fs::path(data_dir, "series_matrix_files")
 if (!dir_exists(download_dir)) {
   dir_create(download_dir)
@@ -135,7 +135,7 @@ if (!dir_exists(download_dir)) {
 
 Next, we pull out the phenotype data.
 
-```{r pgse2770, dependson='getgeo-gse2770'}
+```{r pgse2770, dependson='get-gse2770'}
 pGSE2770 <- GSE2770 %>%
   purrr::map(~ as(pData(.x), "data.frame")) %>%
   bind_rows() %>%
