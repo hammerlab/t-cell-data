@@ -3,6 +3,7 @@ Type: Book
 Title: T Cell Data
 Version: 0.0.1
 Imports:
+  GEOquery,
   bookdown,
   knitr,
   rentrez,
@@ -14,5 +15,3 @@ Imports:
   lubridate,
   janitor,
   tidyverse
-biocViews:
-  GEOquery
