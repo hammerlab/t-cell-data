@@ -9,6 +9,7 @@ rmd_files:
     "index.Rmd",
     
     "Introduction.Rmd",
+    "Finding-Data.Rmd",
     
     "References.Rmd"
   ]

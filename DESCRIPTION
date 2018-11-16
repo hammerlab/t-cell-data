@@ -3,4 +3,13 @@ Type: Book
 Title: T Cell Data
 Version: 0.0.1
 Imports:
-  bookdown
+  bookdown,
+  knitr,
+  rentrez,
+  curl,
+  urltools,
+  xml2,
+  fs,
+  lubridate,
+  janitor,
+  tidyverse

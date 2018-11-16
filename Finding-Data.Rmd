@@ -1,0 +1,22 @@
+# Finding Data {#finding-data}
+
+```{r finding-data-options, include=FALSE}
+library(knitr)
+opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
+```
+
+```{r finding-data-libraries}
+# Domain specific
+library(rentrez)
+
+# General purpose
+library(curl)
+library(urltools)
+library(xml2)
+
+# Tidyverse
+library(fs)
+library(lubridate)
+library(janitor)
+library(tidyverse)
+```

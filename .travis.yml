@@ -8,6 +8,11 @@ cache:
 
 before_install:
 - npm install netlify-cli -g
+addons:
+  apt:
+    packages:
+    - libxml2-dev
+    - libcurl4-openssl-dev
 
 script:
 - Rscript -e 'rmarkdown::render_site(encoding = "UTF-8")'
