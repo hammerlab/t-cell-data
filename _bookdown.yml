@@ -10,6 +10,7 @@ rmd_files:
     
     "Introduction.Rmd",
     "Finding-Data.Rmd",
+    "Microarrays.Rmd",
     
     "References.Rmd"
   ]

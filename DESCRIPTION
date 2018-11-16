@@ -4,8 +4,12 @@ Title: T Cell Data
 Version: 0.0.1
 Imports:
   GEOquery,
+  oligo,
+  limma,
+  biobroom,
   bookdown,
   knitr,
+  kableExtra,
   rentrez,
   curl,
   httr,

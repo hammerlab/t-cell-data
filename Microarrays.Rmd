@@ -16,9 +16,6 @@ library(oligo)
 library(limma)
 library(biobroom)
 
-# Domain specific
-library(rentrez)
-
 # General purpose
 library(curl)
 library(urltools)
@@ -37,10 +34,6 @@ Our goal is to find some measurement we can perform to distinguish T cells from 
 
 We will create several tibbles over the course of this chapter, including:
 
-1. `c7_tcells`: our best attempt at pulling out the T cell data sets from ImmuneSigDB. Each row is a gene set.
-
-1. `c7_pubs`: publications from which ImmuneSigDB gene sets are derived. Each row is a PMID.
-
 1. `pGSE2770tidy`: phenotype information for a single GSE GEO ID from ImmuneSigDB. Each row is a GSM GEO ID, i.e. a sample.
 
 1. `eset_tib_genes`: preprocessed expression data for the samples we're analyzing. "Wide" version of table with one column per sample. Primary key is gene.
@@ -49,75 +42,12 @@ We will create several tibbles over the course of this chapter, including:
 
 1. `results_genes_tib`: results of the limma differential expression analysis. Each row is a gene.
 
-## Expression profiling with microarrays
-
-Explain how microarrays work. Probably reference opening of RMA paper.
-
-## T cell expression profiles
-
-My first thought on where to look for expression data on T cells: ImmuneSigDB.
-
-## Exploring ImmuneSigDB
-
-What's in ImmuneSigDB? To find out, head over to the [GSEA downloads page](http://software.broadinstitute.org/gsea/downloads.jsp) (you'll need to register your email address first) and grab the "Current MSigDB xml file"; at the time of this writing, that's `msigdb_v6.2.xml`.
-
+## Managing downloads
 Let's put all of our downloaded data into a single directory.
 
-```{r create-data-dir}
+```{r finding-data-create-data-dir}
 data_dir <- dir_create("data")
 ```
-
-Put the MSigDB file into this directory at `msigdb_files/msigdb_v6.2.xml`. We are only interested in the C7 gene set, also known as ImmuneSigDB. For now we are using XPath to extract the relevant data; perhaps we should show how to explore the XML file and construct this query.
-
-```{r extract-c7, dependson='create-data-dir'}
-x <- read_xml(fs::path(data_dir, "msigdb_files/msigdb_v6.2.xml"))
-c7_xml <- xml_find_all(x, "//GENESET[contains(@CATEGORY_CODE,'C7')]")
-c7_tib <- c7_xml %>% as_list %>% purrr::map(~ as_tibble(attributes(.x))) %>% bind_rows %>% clean_names
-```
-
-Each row in `c7_tib` represents a gene set from ImmuneSigDB. We filter down to those gene sets we suspect relate to T cells.
-
-```{r filter-tcells, dependson='extract-c7'}
-tcell_terms <- c("TCELL", "CD3", "CD4", "CD8")
-c7_tcells <- c7_tib %>% rowwise %>% filter(any(str_detect(standard_name, tcell_terms))) %>% ungroup
-```
-
-We can now explore publications and GEO data sets used to build these gene sets. We are specifically interested in human, not mouse, T cells in this chapter. 
-
-```{r tcell-pubs, dependson='filter-tcells'}
-tcell_pubs <- c7_tcells %>%
-  filter(organism == "Homo sapiens") %>%
-  group_by(pmid) %>%
-  dplyr::summarize(n_genesets = n(), n_geoids = n_distinct(geoid), geoids = toString(unique(geoid))) %>%
-  mutate(n_geoids = if_else(geoids == "", 0L, n_geoids)) %>%
-  arrange(desc(n_genesets))
-```
-
-Let's get some metdata for these papers. 
-
-```{r pub-metadata, dependson='tcell-pubs'}
-pub_meta_esum <- entrez_summary(db = "pubmed", id = tcell_pubs$pmid, config = httr::config(http_version = 2))
-pub_meta_list <- extract_from_esummary(pub_meta_esum, c("uid", "pubdate", "title")) %>% array_branch(2)
-pub_meta_vec <- pub_meta_list %>% purrr::map(unlist) %>% flatten_chr()
-pub_meta <- tribble(~pmid, ~pubdate, ~title, !!!pub_meta_vec)
-pub_meta <- pub_meta %>% mutate(pubdate = parse_date_time(pubdate, orders = c("Y", "Ym", "Ymd")))
-tcell_pubs <- tcell_pubs %>% left_join(pub_meta, by = "pmid")
-```
-
-```{r tcell-pubs-table, dependson='pub-metadata', fig.cap = "T cell publications", echo = FALSE, results = "markup"}
-tcell_pubs %>%
-  mutate(
-    pmid = text_spec(pmid, link = paste0("https://www.ncbi.nlm.nih.gov/pubmed/", pmid))
-  ) %>%
-  kable(escape = FALSE) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed")
-  ) %>%
-  column_spec(5, width = "10em") %>%
-  column_spec(6, width = "100em")
-```
-
-
 
 ## Data from one paper
 First, we download data for GSE2770 from [GEO](https://www.ncbi.nlm.nih.gov/geo/). There are 3 elements in this list, 1 for each platform.
