@@ -1,0 +1,6 @@
+Package: t-cell-data
+Type: Book
+Title: T Cell Data
+Version: 0.0.1
+Imports:
+  bookdown

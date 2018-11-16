@@ -4,7 +4,9 @@ T cells are important.
 
 Here's a picture of activated vs. unactivated T cells from [@Jung2016-al].
 
-![SEM images of resting (A) and effector (B) peripheral blood human T cells. (White scale bars: 1 μm.)](images/TcellSEM.jpg)
+```{r sem, fig.align='center', fig.cap='SEM images of resting (A) and effector (B) peripheral blood human T cells. (White scale bars: 1 μm.)', echo=FALSE}
+knitr::include_graphics('images/TcellSEM.jpg')
+```
 
 TCRs are found in the squiggles. They are x size.
 

@@ -4,7 +4,7 @@ author: "Hammer Lab"
 date: "`r Sys.Date()`"
 documentclass: book
 site: "bookdown::bookdown_site"
-github-repo: hammerlab/learning-about-t-cells-through-data
+github-repo: hammerlab/t-cell-data
 description: "An examination of T cells using several open data sets."
 bibliography: "paperpile.bib"
 link-citations: true
@@ -13,8 +13,8 @@ cover-image: images/cover.png
 
 # Preface {-}
 
-```{r fig.align='center', echo=FALSE, include=identical(knitr:::pandoc_to(), 'html')}
-knitr::include_graphics('images/cover.png', dpi = NA)
+```{r cover-image, fig.align='center', echo=FALSE}
+knitr::include_graphics('images/cover.png')
 ```
 
 This book explores what open data sets can tell us about T cells. This exploration will highlight a few of the many repositories of data available for analysis, provide code samples for working with this data, and examine the evidence in this data for the various subsets, states, and behaviors of T cells.

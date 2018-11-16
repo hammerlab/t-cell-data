@@ -1,0 +1,16 @@
+language: R
+sudo: false
+cache:
+  packages: true
+  directories:
+  - $HOME/.npm
+  - data
+
+before_install:
+- npm install netlify-cli -g
+
+script:
+- Rscript -e 'rmarkdown::render_site(encoding = "UTF-8")'
+
+after_success:
+- netlify deploy --prod --dir _book

@@ -1,19 +1,14 @@
-book_filename: "learning-about-t-cells-through-data"
+book_filename: "t-cell-data"
 language:
   ui:
     chapter_name: "Chapter "
 delete_merged_file: true
-output_dir: "docs"
 new_session: yes
 rmd_files:
   [
     "index.Rmd",
     
     "Introduction.Rmd",
-    "Flow.Rmd",
-    "Microarrays.Rmd",
-    "RNA-seq.Rmd",
-    "scRNA-seq.Rmd",
     
     "References.Rmd"
   ]
