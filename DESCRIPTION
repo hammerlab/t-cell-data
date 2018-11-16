@@ -18,4 +18,8 @@ Imports:
   fs,
   lubridate,
   janitor,
-  tidyverse
+  tidyverse,
+  FlowRepositoryR,
+  flowCore,
+  openCyto,
+  ggcyto

@@ -129,6 +129,7 @@ autoplot(gs[[1]], strip.text = "gate", bins=100, merge=F, axis_inverse_trans=F) 
 
 This should then be comparable to what was in the [OMIP-021 publication](https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22475), and here are relevant figures demonstrating the similarity of the cell subsets captured:
 
-![optional caption text](https://drive.google.com/uc?export=view&id=1LJ9kSIHO-PnqOy3BnP1cy0t93uw2BMrF)
-
+```{r OMIP-021-figure, fig.align='center', fig.cap='Gating strategy illustrated with annotated figures from OMIP-021', echo=FALSE}
+knitr::include_graphics('images/OMIP021.png')
+```
 
