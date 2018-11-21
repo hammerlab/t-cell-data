@@ -98,3 +98,14 @@ tcell_pubs %>%
   column_spec(5, width = "10em") %>%
   column_spec(6, width = "100em")
 ```
+
+We're most interested in the expression profile of common T cell subsets in healthy subjects without an intervention.
+
+The best candidates based on manual inspection of this table:
+
+- [Immune response in silico (IRIS): immune-specific genes identified from a compendium of microarray expression data](https://www.ncbi.nlm.nih.gov/pubmed/15789058) (2005): CD8, CD4, and memory T cells from 3 or 4 individuals profiled with the Affy U133A and B arrays. The paper that launched a thousand deconvolution papers. 
+- [Deconvolution of blood microarray data identifies cellular activation patterns in systemic lupus erythematosus](https://www.ncbi.nlm.nih.gov/pubmed/19568420) (2009): [GSE11057](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE11057) seems to contain PBMC, Naive, EM, and CM expression profiles for 4 individuals profiled with the Affy U133 Plus 2.0 Array. I can't tell if these are from SLE patients or healthy subjects though. This data was re-analyzed in [An expression atlas of human primary cells: inference of gene function from coexpression networks](https://www.ncbi.nlm.nih.gov/pubmed/24053356) (2013) and in the MCP-counter paper [Estimating the population abundance of tissue-infiltrating immune and stromal cell populations using gene expression](https://www.ncbi.nlm.nih.gov/pubmed/27765066) (2016).
+
+Other interesting papers:
+- [Gene expression profiles during human CD4+ T cell differentiation](https://www.ncbi.nlm.nih.gov/pubmed/15210650) (2004): intrathymic T progenitor cells (ITTP), "double positive" thymocytes (DP), "single positive" thymocytes (SP4), naïve T cells from cord blood (CB4+), and naïve T cells from adult blood (AB4+) for 3 individuals profiled with Affy U133A and B arrays. Cool data for T cell development.
+- [Functional heterogeneity of human effector CD8+ T cells](https://www.ncbi.nlm.nih.gov/pubmed/22174157) (2012): CXCR1+ and CXCR1- subsets of human effector CD27-CD28-CD8+ T cells 5 individuals profiled with the Affy U133 Plus 2.0 Array. Could easily pool data from individuals to get a nice CD8+ Teff profile.
