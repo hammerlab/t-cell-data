@@ -1,7 +1,22 @@
 # Introduction {#introduction}
 
-T cells are important.
+## Basic T cell biology
+To learn or review basic information about the biology of the adaptive immune system and T cells, the following freely available book chapters may be helpful.
 
+**Molecular Biology of the Cell, Chapter 24: The Adaptive Immune System**
+
+- [Lymphocytes and the Cellular Basis of Adaptive Immunity](https://www.ncbi.nlm.nih.gov/books/NBK26921/)
+- [T Cells and MHC Proteins](https://www.ncbi.nlm.nih.gov/books/NBK26926/)
+- [Helper T Cells and Lymphocyte Activation](https://www.ncbi.nlm.nih.gov/books/NBK26827/)
+
+**Immunobiology, Chapter 8: T Cell-Mediated Immunity**
+
+- [The production of armed effector T cells](https://www.ncbi.nlm.nih.gov/books/NBK27118/)
+- [General properties of armed effector T cells](https://www.ncbi.nlm.nih.gov/books/NBK27149/)
+- [T cell-mediated cytotoxicity](https://www.ncbi.nlm.nih.gov/books/NBK27101/)
+- [Macrophage activation by armed CD4 TH1 cells](https://www.ncbi.nlm.nih.gov/books/NBK27153/)
+
+## Building intuition
 Here's a picture of activated vs. unactivated T cells from [@Jung2016-al].
 
 ```{r sem, fig.align='center', fig.cap='SEM images of resting (A) and effector (B) peripheral blood human T cells. (White scale bars: 1 μm.)', echo=FALSE}
@@ -11,3 +26,6 @@ knitr::include_graphics('images/TcellSEM.jpg')
 TCRs are found in the squiggles. They are x size.
 
 Here's the proportion in circulating blood. Here's how many come from the thymus per day. Here's how long they live.
+
+## T cell subsets
+n 1975, Harvey Cantor and Edward Boyse established the distinction between what we would call today CD4+ and CD8+ T cells [@Cantor1975-le].
