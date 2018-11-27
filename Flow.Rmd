@@ -367,6 +367,8 @@ df_rd %>% melt(id.vars='type') %>%
     r <- .
     df %>% select(one_of('type', r$variable)) %>% set_names(c('type', 'value')) %>%
       mutate(group=case_when(type == r$type ~ 'Target Cell Type', TRUE ~ 'Other Cell Types')) %>%
+      # Downsample as more than 10k samples per-group becomes unnecessarily redundant
+      group_by(group) %>% do(sample_n(., min(nrow(.), 10000))) %>% ungroup %>%
       mutate(rd=format(r$value, digits=3), marker=r$variable, type=r$type)
   }) %>% 
   ggplot(aes(x=value, fill=group)) + 
