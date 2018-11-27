@@ -6,7 +6,7 @@ documentclass: book
 site: "bookdown::bookdown_site"
 github-repo: hammerlab/t-cell-data
 description: "An examination of T cells using several open data sets."
-bibliography: "paperpile.bib"
+bibliography: ["paperpile.bib", "flow.bib"]
 link-citations: true
 cover-image: images/cover.png
 ---
