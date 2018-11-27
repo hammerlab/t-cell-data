@@ -31,7 +31,7 @@ Let's put all of our downloaded data into a single directory.
 data_dir <- dir_create("data")
 ```
 
-## Exploring ImmuneSigDB
+## ImmuneSigDB
 
 What's in ImmuneSigDB? To find out, [register](http://software.broadinstitute.org/gsea/register.jsp) with GSEA and download the "Current MSigDB xml file"; at the time of this writing, that's `msigdb_v6.2.xml`.
 
@@ -98,3 +98,42 @@ tcell_pubs %>%
   column_spec(5, width = "10em") %>%
   column_spec(6, width = "100em")
 ```
+
+We're most interested in the expression profile of common T cell subsets in healthy subjects without an intervention.
+
+The best candidates based on manual inspection of this table:
+
+- [Immune response in silico (IRIS): immune-specific genes identified from a compendium of microarray expression data](https://www.ncbi.nlm.nih.gov/pubmed/15789058) (2005): [GSE22886](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE22886) has CD8, CD4, and memory T cells from 3 or 4 individuals profiled with the Affy U133A and B arrays. The paper that launched a thousand deconvolution papers. 
+- [Deconvolution of blood microarray data identifies cellular activation patterns in systemic lupus erythematosus](https://www.ncbi.nlm.nih.gov/pubmed/19568420) (2009): [GSE11057](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE11057) seems to contain PBMC, Naive, EM, and CM expression profiles for 4 individuals profiled with the Affy U133 Plus 2.0 Array. I can't tell if these are from SLE patients or healthy subjects though. This data was re-analyzed in [An expression atlas of human primary cells: inference of gene function from coexpression networks](https://www.ncbi.nlm.nih.gov/pubmed/24053356) (2013) and in the MCP-counter paper [Estimating the population abundance of tissue-infiltrating immune and stromal cell populations using gene expression](https://www.ncbi.nlm.nih.gov/pubmed/27765066) (2016).
+
+Other interesting papers:
+- [Gene expression profiles during human CD4+ T cell differentiation](https://www.ncbi.nlm.nih.gov/pubmed/15210650) (2004): intrathymic T progenitor cells (ITTP), "double positive" thymocytes (DP), "single positive" thymocytes (SP4), naïve T cells from cord blood (CB4+), and naïve T cells from adult blood (AB4+) for 3 individuals profiled with Affy U133A and B arrays. Cool data for T cell development.
+- [Functional heterogeneity of human effector CD8+ T cells](https://www.ncbi.nlm.nih.gov/pubmed/22174157) (2012): CXCR1+ and CXCR1- subsets of human effector CD27-CD28-CD8+ T cells 5 individuals profiled with the Affy U133 Plus 2.0 Array. Could easily pool data from individuals to get a nice CD8+ Teff profile.
+
+## MCP-counter
+
+The MCP-counter paper [Estimating the population abundance of tissue-infiltrating immune and stromal cell populations using gene expression](https://www.ncbi.nlm.nih.gov/pubmed/27765066) (2016) organizes expression data by cell type in their supplemental material.
+
+I've combined data for T cells across tables S1, S4, and S5 in [my curated version](https://docs.google.com/spreadsheets/d/1AI00Q3MK53dZ3K1YqrncKoQm0Kxj1CFOQgfrl3lp7fM/edit). They've catalogued data for 1,776 samples from 65 GEO series for 22 different T cell phenotypes across 4 (?) different array platforms. We should explore this data!
+
+```{r mcp-counter-data}
+mcp_datasets <- c("Chtanova", "GSE10586", "GSE11057", "GSE11188", "GSE11292", 
+"GSE12875", "GSE13017", "GSE13906", "GSE14908", "GSE14924", "GSE14926", 
+"GSE15659", "GSE17354", "GSE17922", "GSE18893", "GSE19069", "GSE20198", 
+"GSE22045", "GSE22886", "GSE23293", "GSE23294", "GSE23295", "GSE23332", 
+"GSE25087", "GSE26928", "GSE27291", "GSE2770", "GSE28107", "GSE28490", 
+"GSE28491", "GSE29583", "GSE32901", "GSE32959", "GSE33670", "GSE36476", 
+"GSE36769", "GSE37213", "GSE41909", "GSE42569", "GSE43177", "GSE43260", 
+"GSE44392", "GSE44460", "GSE44621", "GSE45535", "GSE473", "GSE48558", 
+"GSE49703", "GSE49877", "GSE50175", "GSE51540", "GSE52129", "GSE53455", 
+"GSE53514", "GSE5580", "GSE56035", "GSE58867", "GSE60234", "GSE60235", 
+"GSE6338", "GSE64914", "GSE6566", "GSE6740", "GSE7497", "GSE8835")
+
+mcp_phenotypes <- c("Activated CD4+ T cells", "Activated Memory CD4 T cells", "Activated T cells", 
+"Canonical CD4 Treg cells", "CD4 T cells", "CD8 T cells", "Central Memory CD4 T cells", 
+"CXCR5+ Memory CD4 T cells", "Effector Memory CD4 T cells", "Effector Memory CD8 T cells", 
+"Effector Memory T cells", "Memory CD4 T cells", "Naive CD4 T cells", 
+"Naive T cells", "Resting Memory CD4 T cells", "T cells", "T gamma delta", 
+"Th1", "Th17", "Th1Th17", "Th2", "Type 1 regulatory cells")
+```
+
