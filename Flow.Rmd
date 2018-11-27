@@ -309,7 +309,7 @@ df %>%
 
 Workflow gates for terminal cell populations overlaid on relevant expression distributions:
 
-```{r flow-plot-terminal-gates, fig.width=8, fig.height=4}
+```{r flow-plot-terminal-gates, fig.width=8, fig.height=6}
 autoplot(gh, cell_pops[1:8], bins=50, strip.text='gate', axis_inverse_trans=FALSE) + 
   ggcyto_par_set(facet=facet_wrap(~name, scales='free'), limits = list(x=c(0, 225), y=c(0, 225))) + 
   flow_theme 
