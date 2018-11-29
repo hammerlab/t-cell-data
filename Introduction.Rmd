@@ -28,13 +28,13 @@ TCRs are found in the squiggles. They are x size.
 Here's the proportion in circulating blood. Here's how many come from the thymus per day. Here's how long they live.
 
 ## History of T cell subsets
-In 1975, Harvey Cantor and Edward Boyse established the distinction between what we would call today CD4+ and CD8+ T cells [@Cantor1975-le]. For a more recent review, see [@Chess2006-jt]).
+In 1975, Harvey Cantor and Edward Boyse established the distinction between what we would call today CD4+ and CD8+ T cells [@Cantor1975-le]. For a review, see [@Chess2006-jt].
 
-In 1986, CD4+ T cells were further subdivided into Th1 and Th2 cells [@Mosmann1986-hy]. For more recent reviews, see [@Liew2002-pq] and [@McGhee2005-dq]).
-
-
+In 1986, CD4+ T cells were further subdivided into Th1 and Th2 cells [@Mosmann1986-hy]. For reviews, see [@Liew2002-pq] and [@McGhee2005-dq].
 
 A more complex chapter in the history of T cell subsets involves T suppressor cells and T regulatory (Treg) cells. For reviews of this topic, see [@Shevach2011-aj] and [@Bluestone2017-mw].
+
+In 2003, Th17 cells [@Aggarwal2003-fz] were identified as distinct from Th1 and Th2 cells. For a review, see [@Basso2009-fv].
 
 In 1999, the distinction between effector memory (Tem) and central memory (Tcm) T cells was established by Sallusto, Lanzavecchia, and colleagues [@Sallusto1999-ea]. For more recent reviews, see [@Sallusto2004-ch] and [@Kaech2014-fm]).
 
