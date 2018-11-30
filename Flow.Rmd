@@ -6,6 +6,10 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 ```
 
 ```{r flow-libraries}
+# Publication-related
+library(kableExtra)
+options(kableExtra.html.bsTable = T)
+
 # Bioconductor
 library(FlowRepositoryR)
 library(flowCore)
@@ -75,7 +79,7 @@ tibble(
   filter(has_flowjo_ws) %>% 
   select(-has_flowjo_ws) %>% 
   arrange(panel) %>%
-  knitr::kable()
+  kable
 ```
 
 ## Tools
@@ -100,7 +104,10 @@ dataset <- flowRep.get(dataset_id)
 if (!dir_exists(dataset_path))
   dataset <- download(dataset, dirpath=dataset_path, only.files="Donor.*fcs", show.progress=F)
 fr <- read.FCS(fs::path(getwd(), dataset_path, 'Donor1.fcs'))
-fr %>% exprs %>% data.frame %>% head(10) %>% knitr::kable(format.args = list(digits=3))
+fr %>% exprs %>% as.tibble %>% head(10) %>% 
+  kable(format.args = list(digits=3)) %>%
+  kable_styling() %>%
+  scroll_box(width="100%")
 ```
 
 In this dataset, one way to identify lymphocytes is by looking at modes in the relationship between side and forward scatter:
@@ -204,7 +211,7 @@ gh <- gs[[1]]
 Show the correspondence between the flow cytometer channels and the marker names in the panel.
 
 ```{r flow-show-markers, results='markup'}
-getData(gh)@parameters@data %>% select(name, desc)
+getData(gh)@parameters@data %>% select(name, desc) %>% kable
 ```
 
 Plot the gating workflow starting from where T Cells are first identified:
@@ -223,6 +230,8 @@ knitr::include_graphics('images/flow-OMIP030-model.png')
 ### Extracting Single Cell Data
 
 Identify terminal nodes (i.e. cell populations) in the workflow which were, by convention, prefixed with either ```CD4+``` or ```CD8+``` and then use those nodes to extract single-cell data into a data frame (useful for custom visualizations).
+
+TODO: make display of pop names better (and make states a map from type?)
 
 ```{r flow-cell-metadata, results='asis'}
 # Extract all terminal node names into a vector
@@ -245,7 +254,12 @@ cell_pop_to_mem_state <- function(x) case_when(
 # Create vectors of all distinct cell states and types
 cell_states <- cell_pops[!is.na(cell_pop_to_mem_state(cell_pops))]
 cell_types <- discard(cell_pops, ~. %in% cell_states)
-print(list(cell_types=cell_types, cell_states=cell_states))
+
+tibble(
+  population=cell_pops, 
+  state=cell_pops %>% cell_pop_to_mem_state, 
+  class=cell_pops %>% cell_pop_to_class
+) %>% kable
 ```
 
 Next, extract data from the ```flowFrame``` using the ```getIndices``` function which, for a given list of ```m``` node names, returns an ```n``` x ```m``` matrix where ```n``` is the number of cells and ```m``` logical columns contain ```TRUE/FALSE``` values indicating whether or not the cell (row) was in that population.
@@ -287,7 +301,7 @@ df <- fr %>% exprs %>% as_tibble %>%
   filter(!is.na(type))
 
 df %>% select(type, state, class, label, CD3, CD4, CD8) %>% 
-  head(10) %>% knitr::kable()
+  head(10) %>% kable
 ```
 
 ### Preliminary Visualization
