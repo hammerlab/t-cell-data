@@ -120,7 +120,7 @@ ggcyto(fr, aes(x='FSC-A', y='SSC-A')) + geom_hex(bins=100)
 To identify the lymphocyte cells above, ```openCyto``` gating can be used to select the largest cluster of cells automatically and visualize what fraction of the population these cells constitute:
 
 ```{r flow-example-flow-clust-gate}
-gate <- openCyto::flowClust.2d(fr, 'FSC-A', 'SSC-A', K=3, quantile=.9)
+gate <- gate_flowClust_2d(fr, 'FSC-A', 'SSC-A', K=3, quantile=.95)
 ggcyto(fr, aes(x='FSC-A', y='SSC-A')) + geom_hex(bins=100) + geom_gate(gate) + geom_stats()
 ```
 
