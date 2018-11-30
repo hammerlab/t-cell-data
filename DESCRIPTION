@@ -22,4 +22,6 @@ Imports:
   FlowRepositoryR,
   flowCore,
   openCyto,
-  ggcyto
+  ggcyto,
+  umap,
+  FlowSOM
