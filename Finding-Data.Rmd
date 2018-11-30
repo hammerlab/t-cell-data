@@ -10,6 +10,9 @@ opts_chunk$set(results='hide', warning=FALSE, message=FALSE)
 library(kableExtra)
 options(kableExtra.html.bsTable = T)
 
+# Bioconductor
+library(GEOquery)
+
 # Domain specific
 library(rentrez)
 
@@ -19,6 +22,7 @@ library(xml2)
 
 # Tidyverse
 library(fs)
+library(glue)
 library(lubridate)
 library(janitor)
 library(tidyverse)
@@ -114,10 +118,10 @@ Other interesting papers:
 
 The MCP-counter paper [Estimating the population abundance of tissue-infiltrating immune and stromal cell populations using gene expression](https://www.ncbi.nlm.nih.gov/pubmed/27765066) (2016) organizes expression data by cell type in their supplemental material.
 
-I've combined data for T cells across tables S1, S4, and S5 in [my curated version](https://docs.google.com/spreadsheets/d/1AI00Q3MK53dZ3K1YqrncKoQm0Kxj1CFOQgfrl3lp7fM/edit). They've catalogued data for 1,776 samples from 65 GEO series for 22 different T cell phenotypes across 4 (?) different array platforms. We should explore this data!
+I've combined data for T cells across tables S1, S4, and S5 in [my curated version](https://docs.google.com/spreadsheets/d/1AI00Q3MK53dZ3K1YqrncKoQm0Kxj1CFOQgfrl3lp7fM/edit). They've catalogued data for 1,776 samples from 64 GEO series (not on GEO, but included: data from [@Chtanova2005-zq]) for 22 different T cell phenotypes across 4 (?) different array platforms. We should explore this data!
 
 ```{r mcp-counter-data}
-mcp_datasets <- c("Chtanova", "GSE10586", "GSE11057", "GSE11188", "GSE11292", 
+mcp_datasets <- c("GSE10586", "GSE11057", "GSE11188", "GSE11292", 
 "GSE12875", "GSE13017", "GSE13906", "GSE14908", "GSE14924", "GSE14926", 
 "GSE15659", "GSE17354", "GSE17922", "GSE18893", "GSE19069", "GSE20198", 
 "GSE22045", "GSE22886", "GSE23293", "GSE23294", "GSE23295", "GSE23332", 
@@ -135,5 +139,27 @@ mcp_phenotypes <- c("Activated CD4+ T cells", "Activated Memory CD4 T cells", "A
 "Effector Memory T cells", "Memory CD4 T cells", "Naive CD4 T cells", 
 "Naive T cells", "Resting Memory CD4 T cells", "T cells", "T gamma delta", 
 "Th1", "Th17", "Th1Th17", "Th2", "Type 1 regulatory cells")
+```
+
+We can use `rentrez` to query the [GEO DataSets (GDS)](https://www.ncbi.nlm.nih.gov/gds/) database.
+TODO(hammer): get the PMIDs associated with these GSEs, then make a table to compare to `tcell_pubs`.
+
+```{r mcp-geo}
+mcp_str <- str_c(mcp_datasets, collapse = "[ACCN] OR ")
+query <- glue("({mcp_str}[ACCN]) AND GSE[ETYP]")
+mcp_ids <- entrez_search(db = "gds", term = query, retmax = 100, config = httr::config(http_version = 2))
+mcp_esum <- entrez_summary(db = "gds", id = mcp_ids$ids, config = httr::config(http_version = 2))
+mcp_list <- extract_from_esummary(mcp_esum, c("gse", "n_samples", "title", "summary")) %>% array_branch(2)
+mcp_vec <- mcp_list %>% purrr::map(unlist) %>% flatten_chr()
+mcp <- tribble(~gse, ~n_samples, ~title, ~summary, !!!mcp_vec)
+```
+
+```{r mcp-table, fig.cap = "MCP GEO DataSets", echo = FALSE, results = "markup"}
+mcp %>%
+  arrange(desc(parse_integer(n_samples))) %>%
+  kable(escape = FALSE) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed")
+  )
 ```
 
